@@ -41,6 +41,10 @@ table.insert(btn.regions, obj("FontString", 90, 240, 56, 42, { text = "Beenden &
 table.insert(root.children, btn)
 -- Text überdeckt den Knopf
 table.insert(root.regions, obj("FontString", 120, 200, 70, 50, { text = "Hinweis" }))
+-- Häkchen: Beschriftung rechts neben dem Kästchen ist gewollt
+local cb = obj("CheckButton", 10, 34, 30, 6)
+table.insert(cb.regions, obj("FontString", 36, 160, 25, 11, { text = "Landealarm" }))
+table.insert(root.children, cb)
 -- Scrollbereich: unten herauslaufen ist erlaubt
 local sf = obj("ScrollFrame", 0, 400, 380, 320)
 local child = obj("Frame", 0, 400, 380, 0)
@@ -60,4 +64,10 @@ check(#f == 4, "genau 4 Funde (" .. #f .. "):\n" .. all)
 local logged = 0
 for _, e in ipairs(PastimeDB.log) do if e.c == "layout" and e.l == "W" then logged = logged + 1 end end
 check(logged == 4, "4 Warnungen im Protokoll")
+check(not all:find("Landealarm"), "Häkchen-Beschriftung kein Fehlalarm")
+-- läuft im Debug-Modus jede halbe Sekunde: nichts doppelt protokollieren
+check(#ns.LayoutCheck({ root }) == 4, "zweiter Durchlauf findet dasselbe")
+local logged2 = 0
+for _, e in ipairs(PastimeDB.log) do if e.c == "layout" then logged2 = logged2 + 1 end end
+check(logged2 == 4, "zweiter Durchlauf protokolliert nichts doppelt (" .. logged2 .. ")")
 print(("Layout-Tests: %d ok, %d Fehler"):format(passes, fails))

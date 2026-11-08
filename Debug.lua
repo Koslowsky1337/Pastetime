@@ -119,13 +119,17 @@ local function CreatePanel()
     f.text:SetPoint("TOPLEFT", 10, -28)
     f.text:SetWidth(340)
     f.text:SetSpacing(2)
-    local acc = 1
+    local acc, layoutN = 1, 0
     f:SetScript("OnUpdate", function(self, elapsed)
         acc = acc + elapsed
         if acc < 0.5 then return end
         acc = 0
         local ok, lines = pcall(ns.DebugLines)
-        self.text:SetText(ok and table.concat(lines, "\n") or ("Errors: " .. tostring(lines)))
+        -- Layout-Prüfung läuft mit: alles, was man durchklickt, wird geprüft (neue Funde ins Protokoll)
+        local okL, found = pcall(ns.LayoutCheck)
+        if okL then layoutN = #found end
+        self.text:SetText((ok and table.concat(lines, "\n") or ("Errors: " .. tostring(lines)))
+            .. ("\nLayout: %d problem(s) on screen · /pastime log"):format(layoutN))
         local h = self.text:GetStringHeight()
         if h then self:SetHeight(h + 40) end
     end)
@@ -209,6 +213,7 @@ end
 -- überstehende und überlappende Texte/Knöpfe als Warnung „layout“ im Protokoll
 ---------------------------------------------------------------------------
 local TOL = 1
+local logged, loggedN = {}, 0
 
 local function rect(r)
     local l, rt, t, b = r:GetLeft(), r:GetRight(), r:GetTop(), r:GetBottom()
@@ -256,7 +261,8 @@ function ns.LayoutCheck(roots)
                 local l, r, t, b = textRect(reg)
                 if l then
                     items[#items + 1] = { reg, l, r, t, b }
-                    if fl and (l < fl - TOL or r > fr + TOL or (not inScroll and (t > ft + TOL or b < fb - TOL))) then
+                    -- Häkchen: Beschriftung steht absichtlich neben dem Kästchen
+                    if fl and frame:GetObjectType() ~= "CheckButton" and (l < fl - TOL or r > fr + TOL or (not inScroll and (t > ft + TOL or b < fb - TOL))) then
                         report(("sticks out of %s: %s"):format(label(frame), label(reg)))
                     end
                 end
@@ -285,9 +291,12 @@ function ns.LayoutCheck(roots)
     for _, root in ipairs(roots or { ns.frame, ns.alertFrame }) do
         if root and root:IsVisible() then walk(root, false) end
     end
-    for i, msg in ipairs(found) do
-        if i > 40 then ns.Log("W", "layout", "... %d more", #found - 40); break end
-        ns.Log("W", "layout", "%s", msg)
+    -- jeder Fund nur einmal pro Sitzung ins Protokoll (die Prüfung läuft im Debug-Modus ständig)
+    for _, msg in ipairs(found) do
+        if not logged[msg] and loggedN < 100 then
+            logged[msg], loggedN = true, loggedN + 1
+            ns.Log("W", "layout", "%s", msg)
+        end
     end
     return found
 end

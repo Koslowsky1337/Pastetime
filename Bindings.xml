@@ -1,0 +1,5 @@
+<Bindings>
+	<Binding name="PASTIME_TOGGLE" category="Pastime">
+		Pastime_Toggle()
+	</Binding>
+</Bindings>

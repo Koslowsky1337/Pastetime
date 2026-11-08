@@ -1,0 +1,41 @@
+## Interface: 16001
+## Title: Pastime
+## Notes: 19 mini-games for flight paths, zeppelins and boats. Opens by itself when you travel, pauses on arrival and keeps leaderboards for every route. /pastime
+## Notes-deDE: 19 Minispiele für Flüge, Zeppeline und Schiffe. Öffnet sich auf Reisen von selbst, pausiert bei der Ankunft und führt Bestenlisten für jede Strecke. /pastime
+## Category: Minigames
+## Category-deDE: Minispiele
+## Version: 1.0.0
+## X-License: MIT
+## IconTexture: Interface\Icons\INV_Misc_Dice_01
+## AddonCompartmentFunc: Pastime_OnAddonCompartmentClick
+## SavedVariables: PastimeDB
+
+Locales\Locales.lua
+Locales\deDE.lua
+Core.lua
+Comm.lua
+Transport.lua
+Widgets.lua
+UI.lua
+Debug.lua
+Options.lua
+Games\Snake.lua
+Games\Flappy.lua
+Games\Runner.lua
+Games\Moles.lua
+Games\Fishing.lua
+Games\Tetris.lua
+Games\Breakout.lua
+Games\Invaders.lua
+Games\Mines.lua
+Games\Simon.lua
+Games\Memory.lua
+Games\Mastermind.lua
+Games\Wordle.lua
+Games\Connect4.lua
+Games\2048.lua
+Games\Match3.lua
+Games\Cards.lua
+Games\Blackjack.lua
+Games\Yahtzee.lua
+Games\Solitaire.lua

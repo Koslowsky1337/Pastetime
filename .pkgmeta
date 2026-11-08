@@ -1,0 +1,10 @@
+package-as: Pastime
+
+ignore:
+  - tests
+  - media
+  - "*.md"
+
+manual-changelog:
+  filename: CHANGELOG.md
+  markup-type: markdown

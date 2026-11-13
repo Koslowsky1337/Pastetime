@@ -128,14 +128,19 @@ check(#g:Info() == 2, "Windreiter: Seitenleiste ohne Lückenhöhe")
 -- Leertaste direkt nach dem Absturz startet nicht neu
 ns.run.overAt = NOW
 check(key("SPACE") and over(), "Leertaste-Sperre direkt nach Spielende")
-NOW = NOW + 0.8
+NOW = NOW + 1
+check(key("SPACE") and over(), "nach 1 s noch gesperrt")
+NOW = NOW + 0.6
 key("SPACE")
-check(ns.run.state == "running" and ns.run.game.waiting, "nach 0,75 s startet die Leertaste neu")
+check(ns.run.state == "running" and ns.run.game.waiting, "nach 1,5 s startet die Leertaste neu")
 check(ns.run.game.hint.text:find("W") and #ns.run.game.hint.text > 0, "Windreiter: Starthinweis gesetzt")
--- Spiele ohne resumeDelay: kein Countdown
+-- Windnatter hat den Countdown auch, Spiele ohne resumeDelay nicht
 g = start("snake")
 key("RIGHT"); key("P"); ns.Resume()
-check(ns.run.state == "running" and ns.run.countdown == nil, "Windnatter: kein Countdown")
+check(ns.run.countdown == 3, "Windnatter: Countdown nach Pause")
+g = start("2048")
+key("P"); ns.Resume()
+check(ns.run.state == "running" and ns.run.countdown == nil, "2048: kein Countdown")
 ns.ShowLauncher()
 
 -- Kobold-Hauen ----------------------------------------------------------------

@@ -93,7 +93,7 @@ function ns.HandleKey(key, down)
         elseif run.state == "over" then ns.ShowLauncher(); used = true end
     elseif run.state == "over" and key == "SPACE" then
         -- kurze Sperre: wer beim Absturz noch hämmert, soll das Ergebnis erst sehen
-        if GetTime() - (run.overAt or 0) >= 0.75 then ns.Restart() end
+        if GetTime() - (run.overAt or 0) >= 1.5 then ns.Restart() end
         used = true
     elseif run.state == "running" and key == "P" and not run.def.textInput then
         ns.Pause(); used = true

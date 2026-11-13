@@ -113,13 +113,18 @@ local x0 = g.snake[1].x
 tick(1)
 check(g.snake[1].x == x0, "steht in Pause")
 ns.overlay.scripts.OnMouseUp(ns.overlay)
-check(run.state == "running" and ns.gameView.kb, "weiter per Klick")
+check(run.state == "running" and ns.gameView.kb and run.countdown == 3, "weiter per Klick, Countdown 3")
+tick(2.9)
+check(g.snake[1].x == x0 and run.countdown ~= nil, "steht während des Countdowns")
+tick(0.2)
+check(run.countdown == nil, "Countdown vorbei")
 -- gegen die Wand
 tick(3)
 check(g.dead and run.state == "over", "Snake an Wand gestorben")
 check(ns.overlay.title.text == "Spiel vorbei" and ns.overlay.text.text:find("Neuer Rekord"), "Rekord-Overlay: " .. ns.overlay.text.text)
 check(PastimeDB.scores.snake and PastimeDB.scores.snake[1].s == g.score, "Snake-Rekord gespeichert")
--- Leertaste = nochmal
+-- Leertaste = nochmal (nach der kurzen Sperre)
+NOW = NOW + 2
 check(key("SPACE"), "SPACE im Endbildschirm verbraucht")
 check(ns.run.state == "running" and ns.run.game.score == 0, "Neustart per Leertaste")
 check(PastimeDB.stats.games.snake.n == 2, "2 Partien gezählt")

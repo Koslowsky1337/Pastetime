@@ -129,7 +129,8 @@ function Game:Tick()
     if grow then
         self.eaten = self.eaten + 1
         self.score = self.score + 10 * self:Level()
-        self.step = math.max(0.06, 0.15 - self.eaten * 0.003)
+        -- schneller nur mit jeder neuen Stufe (alle 8 Eier), Höchsttempo ab Stufe 6
+        self.step = math.max(0.075, 0.15 - (self:Level() - 1) * 0.015)
         self.host:Sound("point")
         if self.eaten % 5 == 0 and not self.pearl then
             local px, py = self:FreeCell()
@@ -179,7 +180,7 @@ function Game:Info()
         { L["Length"], tostring(#self.snake) },
         { L["Murloc eggs"], tostring(self.eaten) },
         { L["Pearls"], tostring(self.pearls) },
-        { L["Speed"], tostring(self:Level()) },
+        { L["Level"], tostring(self:Level()) },
     }
 end
 

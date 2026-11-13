@@ -45,6 +45,51 @@ check(not g.dead and g.snake[1].x == 5 and g.snake[1].y == 6, "Windnatter: in di
 check(isBody(5, 6) and isBody(5, 5) and isBody(6, 5) and isBody(6, 6), "Windnatter: Körper ohne Lücke")
 check(#g.snake == 4 and g.occ[506] and g.occ[505], "Windnatter: Länge und Belegung stimmen")
 
+-- Windnatter: Ablauf (Start, Fressen, Perle, Stufe, Umkehr, Wand, Neustart)
+g = start("snake")
+check(g.waiting and g.hint:IsShown(), "Windnatter wartet mit Hinweis")
+key("LEFT")
+check(g.waiting, "Windnatter: Gegenrichtung startet nicht")
+key("RIGHT")
+check(not g.waiting and not g.hint:IsShown(), "Windnatter startet mit Pfeiltaste")
+key("LEFT")
+check(#g.queue == 0, "Windnatter: Umkehr wird ignoriert")
+g.fx, g.fy = 12, 11
+g:Tick()
+check(g.eaten == 1 and g.score == 10 and #g.snake == 4, "Windnatter frisst Ei: 10 Punkte, wächst")
+check(g.step == 0.15, "Windnatter: ein Ei macht noch nicht schneller")
+g.eaten = 4
+local h = g.snake[1]
+g.fx, g.fy = h.x + 1, h.y
+g:Tick()
+check(g.pearl and g.pearlTex:IsShown() and g.score == 20, "Windnatter: Perle nach 5 Eiern")
+h = g.snake[1]
+g.pearl.x, g.pearl.y = h.x + 1, h.y
+g:Tick()
+check(g.pearls == 1 and g.pearl == nil and g.score == 60, "Windnatter: Perle gibt 30 + 10 × Stufe")
+g.eaten = 7
+h = g.snake[1]
+g.fx, g.fy = h.x + 1, h.y
+g:Tick()
+check(g:Level() == 2 and g.score == 80, "Windnatter: ab 8 Eiern Stufe 2, Ei 20 Punkte")
+check(math.abs(g.step - 0.135) < 1e-9, "Windnatter: Stufe 2 ist schneller (0,135 s)")
+check(g:Info()[4][1] == (ns.LOCALE == "deDE" and "Stufe" or "Level"), "Windnatter: Seitenleiste zeigt Stufe")
+g.eaten = 40; h = g.snake[1]; g.fx, g.fy = h.x, h.y + 1; g.dir = { 0, 1 }; g:Tick()
+check(math.abs(g.step - 0.075) < 1e-9, "Windnatter: Höchsttempo 0,075 s ab Stufe 6")
+g.eaten = 5; g.pearl = { x = 1, y = 1, t = 0.1 }; g.pearlTex:Show()
+g.fx, g.fy = 1, 21
+tick(0.06)
+check(g.pearl == nil and not g.pearlTex:IsShown(), "Windnatter: Perle verschwindet nach Ablauf")
+local score = g.score
+tick(3)
+check(over() and g.dead and best("snake") == score, "Windnatter: Wand beendet die Partie, Wertung " .. score)
+check(ns.overlay:IsShown() and ns.overlay.kind == "over", "Spielende-Overlay sichtbar")
+key("SPACE")
+check(ns.run.state == "running" and ns.run.game.waiting, "Windnatter: Leertaste startet neu")
+g = ns.run.game
+key("RIGHT"); tick(3)
+check(over() and #PastimeDB.scores.snake == 1, "Windnatter: 0 Punkte kommen nicht in die Bestenliste")
+
 -- Kobold-Hauen ----------------------------------------------------------------
 g = start("kobold")
 tick(1.2)

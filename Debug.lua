@@ -271,7 +271,8 @@ function ns.LayoutCheck(roots)
         for _, child in ipairs({ frame:GetChildren() }) do
             if child:IsVisible() then
                 local ot = child:GetObjectType()
-                if ot == "Button" or ot == "CheckButton" then
+                -- Knöpfe nur mit Beschriftung: Karten, Spalten und Felder ohne Text dürfen sich überlappen
+                if (ot == "Button" or ot == "CheckButton") and ((child.GetText and child:GetText()) or "") ~= "" then
                     local l, r, t, b = rect(child)
                     if l then items[#items + 1] = { child, l, r, t, b } end
                 end

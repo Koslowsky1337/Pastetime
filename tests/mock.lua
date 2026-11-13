@@ -5,6 +5,7 @@ NOW = 1000
 GetTime = function() return NOW end
 
 local Methods = {}
+MOCK_METHODS = Methods     -- für tests/layoutsim.lua
 local MT = {}
 MT.__index = function(t, k)
     local m = Methods[k]

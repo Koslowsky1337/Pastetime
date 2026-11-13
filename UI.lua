@@ -616,8 +616,12 @@ function ns.UpdateLauncher()
         local modeName = ns.ModeName(def, mode)
         d.scoreHead:SetText(L["Leaderboard"] .. (modeName and (" – " .. modeName) or ""))
         local scores = ns.GetScores(def, mode)
+        local tbest, troute = ns.TripBest(def, mode)
+        local showRoute = troute or (ns.trip.active and ns.trip.from and ns.trip.to)
+        -- mit Schwierigkeitsknöpfen und Streckenzeile reicht der Platz nur für vier Plätze
+        local maxLines = (showRoute and def.modes) and 4 or 5
         for i, line in ipairs(d.scoreLines) do
-            local e = scores[i]
+            local e = i <= maxLines and scores[i]
             if e then
                 line.left:SetText(("%d. %s  |cff6b5a3a%s|r"):format(i, e.p or "?", e.d or ""))
                 line.right:SetText(ns.FormatScore(def, e.s))
@@ -631,8 +635,7 @@ function ns.UpdateLauncher()
         end
         local gs = ns.DB.stats.games[def.id]
         d.stats:SetText(gs and gs.n > 0 and (L["Played: %d× · %s"]):format(gs.n, ns.FormatTime(gs.t)) or L["Never played"])
-        local tbest, troute = ns.TripBest(def, mode)
-        if troute or (ns.trip.active and ns.trip.from and ns.trip.to) then
+        if showRoute then
             local label = troute and ns.RouteLabel(troute) or ns.RouteLabel(ns.trip)
             d.route:SetText(tbest and (L["Route %s: %s · %s"]):format(label, ns.FormatScore(def, tbest.s), tbest.p or "?")
                 or (L["Route %s: no entry yet"]):format(label))

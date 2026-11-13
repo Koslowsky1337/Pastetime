@@ -11,6 +11,10 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 lua = LuaRuntime(unpack_returned_tuples=True)
 LOCALE = os.environ.get("LOCALE", "deDE")
 lua.execute(open(os.path.join(HERE, "mock.lua"), encoding="utf-8").read())
+# Layout-Rechner (Anker, Größen, Textbreiten) – damit läuft ns.LayoutCheck auch in den Tests
+lua.execute(open(os.path.join(HERE, "layoutsim.lua"), encoding="utf-8").read())
+if os.environ.get("FACTION") == "Alliance":
+    lua.execute('UnitFactionGroup = function() return "Alliance", "Alliance" end')
 lua.execute('GetLocale = function() return "%s" end' % LOCALE)
 lua.execute("""
 UNKNOWN = {}

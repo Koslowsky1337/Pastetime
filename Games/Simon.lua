@@ -154,7 +154,7 @@ local function Create(host, board)
         b.glow:SetBlendMode("ADD")
         b.glow:SetAllPoints()
         b.glow:Hide()
-        local label = ns.FontString(b, "GameFontNormal", "CENTER")
+        local label = ns.FontString(board, "GameFontNormal", "CENTER")   -- unter dem Knopf, gehört zum Spielfeld
         label:SetPoint("TOP", b, "BOTTOM", 0, -2)
         label:SetText(t.name)
         b.label = label

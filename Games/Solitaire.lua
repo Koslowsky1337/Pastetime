@@ -372,8 +372,9 @@ local function Create(host, board)
         s.icon:Show()
     end
     for i = 1, 7 do slot(colX(i), TABY, { where = "tab", pile = i }, ns.Cards.RANKS[13]) end
-    g.stockCount = ns.FontString(board, "GameFontHighlightSmall", "CENTER")
-    g.stockCount:SetPoint("TOP", board, "TOPLEFT", colX(1) + CW / 2, -(TOPY + CH + 1))
+    -- Anzahl unten auf dem Nachziehstapel (darunter beginnt gleich die erste Spalte)
+    g.stockCount = ns.BoardText(board, "GameFontHighlightSmall", "CENTER")
+    g.stockCount:SetPoint("BOTTOM", board, "TOPLEFT", colX(1) + CW / 2, -(TOPY + CH - 4))
     for i = 1, 52 do
         local f = Cards.Create(board, CW, CH)
         f:Hide()

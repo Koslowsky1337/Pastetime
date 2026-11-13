@@ -472,7 +472,7 @@ function ns.EndTrip(arrived, dest)
             t.confirmed = true
             for _, p in ipairs(t.pending) do ns.SubmitRouteScore(r, p.def, p.mode, p.score) end
         end
-        ns.Log("I", "reise", "%s at %s after %s", ns.KINDS[t.kind].arrive, tostring(t.to), ns.FormatTime(dur))
+        ns.Log("I", "reise", "%s: arrived at %s after %s", tostring(t.kind), tostring(t.to), ns.FormatTime(dur))
     else
         ns.Log("I", "reise", "Trip discarded (%s, %s)", tostring(t.kind), tostring(t.phase))
     end

@@ -59,7 +59,8 @@ function ns.CreateParchment(parent)
         bg:Hide()
         f.dark = true
     else
-        bg:SetTexCoord(0, 0.82, 0, 0.62)
+        -- QuestBG ist nur links (~60 %) Pergament, rechts dunkel: nur das Papier zeigen
+        bg:SetTexCoord(0, 0.58, 0, 0.62)
     end
     f.bg = bg
     return f

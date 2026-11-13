@@ -96,7 +96,8 @@ function Game:Choose(idx)
         self.done = true
         self:Render()
         local upper, bonus = self:Totals()
-        return self.host:Over({ score = total, won = true, text = (L["Upper %d%s · final score %d"]):format(upper,
+        -- Solo-Spiel: „Sieg!“ nur für eine richtig gute Partie
+        return self.host:Over({ score = total, won = total >= 200, text =(L["Upper %d%s · final score %d"]):format(upper,
             bonus > 0 and L[" + 35 bonus"] or "", total) })
     end
     self.round = self.round + 1
@@ -150,7 +151,7 @@ end
 function Game:Render()
     self:RenderDice()
     self.rollBtn:SetEnabled(not self.done and self.rolls > 0)
-    self.rollBtn:SetText(self.rolls == 3 and L["Roll"] or (L["Roll again (%d)"]):format(self.rolls))
+    self.rollBtn:SetText(self.rolls == 3 and L["Roll"] or (L["Reroll (%d)"]):format(self.rolls))
     self.rollInfo:SetText(self.rolls == 3 and L["Roll first, then pick a box."]
         or (self.rolls == 0 and L["No rolls left – pick a box."] or L["Click dice to hold them."]))
     local canChoose = not self.done and self.rolls < 3

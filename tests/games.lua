@@ -442,6 +442,12 @@ end
 check(over() and g.round == 13, "Kniffel nach 13 Runden fertig: " .. g.score)
 local u, bo, lo2, tot = g:Totals()
 check(tot == g.score and best("kniffel") == tot, "Summe stimmt und ist gewertet")
+check((ns.overlay.title.text == ns.L["Victory!"]) == (tot >= 200), "Tavernenwürfel: „Sieg!“ nur ab 200 (" .. tot .. ")")
+g = start("kniffel"); key("SPACE"); tick(0.5)
+check(g.rollBtn.text == ns.L["Reroll (%d)"]:format(2), "Tavernenwürfel: Knopf „" .. g.rollBtn.text .. "“")
+-- Karten: Farbzeichen rechts neben dem Wert (auch bei überdeckten Karten sichtbar)
+local card = ns.Cards.Create(UIParent, 54, 76)
+check(card.suit.points.LEFT and card.suit.points.LEFT[1] == card.rank, "Karte: Farbzeichen neben dem Wert")
 
 -- Blackjack -------------------------------------------------------------------------
 local BJ = start("blackjack")
@@ -456,6 +462,20 @@ for hand = 1, 12 do
     for _ = 1, 60 do tick(0.1); if g.state == "bet" or over() then break end end
 end
 check(over(), "Blackjack endet nach zehn Runden oder pleite (Gold " .. g.gold .. ", Runde " .. g.hand .. ")")
+-- Goblin bleibt bei weicher 17 stehen, 18 gegen 17 gewinnt
+g = start("blackjack")
+g.gold, g.bet, g.state, g.t = 90, 10, "dealer", 0
+g.player = { { rank = 10, suit = 1 }, { rank = 8, suit = 2 } }
+g.dealer = { { rank = 1, suit = 3 }, { rank = 6, suit = 4 } }
+g:Update(0.01)
+check(#g.dealer == 2 and g.state == "result" and g.gold == 110, "Blackjack: Goblin hält weiche 17, Gewinn 2× Einsatz")
+-- Verdoppeln: Einsatz doppelt, genau eine Karte
+g = start("blackjack")
+key("1")
+g.state, g.player = "play", { { rank = 5, suit = 1 }, { rank = 6, suit = 2 } }
+g.dealer = { { rank = 10, suit = 3 }, { rank = 7, suit = 4 } }
+key(ns.KEYS.double)
+check(g.bet == 20 and #g.player == 3 and g.state ~= "play", "Blackjack: Verdoppeln zieht genau eine Karte")
 -- Landung: Blackjack wird nur nach vollen Runden gewertet
 ns.StartGame(ns.gamesById.blackjack)
 check(ns.CurrentScore(ns.run) == nil, "Blackjack ohne Wertung bei Ankunft mitten in der Sitzung")

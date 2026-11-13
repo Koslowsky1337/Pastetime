@@ -28,7 +28,7 @@ function Game:Start()
     for _, o in ipairs(self.pool) do self:HideObstacle(o) end
     self.kodo:SetVertexColor(1, 1, 1)
     self:PlaceKodo()
-    self.hint:SetText(L["Space, W or click to start running"])
+    self.hint:SetText(L["Space, W, Up arrow or click to start running"])
     self.hint:Show()
 end
 
@@ -43,8 +43,11 @@ function Game:NewObstacle()
     if not o then return end
     o.active, o.x = true, W + 20
     local r = math.random()
-    if self.score > 120 and r < 0.25 then
+    if self.score > 120 and r < 0.2 then
         o.kind, o.w, o.top, o.bottom = "geier", 30, GY - 74, GY - 38
+    elseif self.score > 60 and r > 0.82 then
+        -- Felsüberhang: reicht bis ganz nach oben, nur geduckt passierbar
+        o.kind, o.w, o.top, o.bottom = "ueberhang", 44 + math.random(0, 16), 0, GY - 38
     elseif r < 0.55 then
         o.kind, o.w = "fels", 30 + math.random(0, 12)
         o.top, o.bottom = GY - 18 - math.random(0, 6), GY
@@ -60,6 +63,10 @@ function Game:NewObstacle()
     elseif o.kind == "fels" then
         o.rock:SetSize(o.w, o.bottom - o.top)
         o.rock:Show()
+    elseif o.kind == "ueberhang" then
+        o.ledge:SetSize(o.w, o.bottom - 8)
+        o.lip:SetSize(o.w + 8, 10)
+        o.ledge:Show(); o.lip:Show()
     else
         o.bird:Show()
     end
@@ -75,6 +82,9 @@ function Game:PlaceObstacle(o)
         o.armR:SetPoint("TOPLEFT", b, "TOPLEFT", x + o.w, -(o.top + 6))
     elseif o.kind == "fels" then
         o.rock:SetPoint("TOPLEFT", b, "TOPLEFT", x, -o.top)
+    elseif o.kind == "ueberhang" then
+        o.ledge:SetPoint("TOPLEFT", b, "TOPLEFT", x, 0)
+        o.lip:SetPoint("TOPLEFT", b, "TOPLEFT", x - 4, -(o.bottom - 10))
     else
         o.bird:SetPoint("TOPLEFT", b, "TOPLEFT", x - 2, -(o.top - 2))
     end
@@ -156,9 +166,11 @@ function Game:Update(dt)
                 if KX + KW - 4 > o.x and KX + 4 < o.x + o.w and kBottom - 3 > o.top and kTop + 3 < o.bottom then
                     self.dead = true
                     self.kodo:SetVertexColor(1, 0.35, 0.35)
-                    local why = o.kind == "geier" and L["Caught by a vulture!"] or
-                        (o.kind == "fels" and L["Tripped over a rock!"] or L["Ran into a cactus!"])
-                    return self.host:Over({ score = self.score, text = why .. (L["\n%d metres across the Barrens"]):format(self.score) })
+                    local why = (o.kind == "geier" and L["Caught by a vulture!"])
+                        or (o.kind == "fels" and L["Tripped over a rock!"])
+                        or (o.kind == "ueberhang" and L["Ran into a rock overhang!"])
+                        or L["Ran into a cactus!"]
+                    return self.host:Over({ score = self.score, text = why })
                 end
             end
         end
@@ -211,11 +223,13 @@ local function Create(host, board)
         o.armL = rect(board, "ARTWORK", 0.22, 0.55, 0.2, 0.7)
         o.armR = rect(board, "ARTWORK", 0.22, 0.55, 0.2, 0.7)
         o.rock = rect(board, "ARTWORK", 0.5, 0.48, 0.45, 0.6)
+        o.ledge = rect(board, "ARTWORK", 0.56, 0.36, 0.22, 0.6)     -- rötlicher Fels wie die Tafelberge
+        o.lip = rect(board, "ARTWORK", 0.40, 0.25, 0.15, 0.7)
         o.bird = board:CreateTexture(nil, "ARTWORK")
         o.bird:SetSize(34, 34)
         ns.SetIcon(o.bird, ICON_VULTURE)
         o.bird:Hide()
-        o.texs = { o.stem, o.armL, o.armR, o.rock, o.bird }
+        o.texs = { o.stem, o.armL, o.armR, o.rock, o.ledge, o.lip, o.bird }
         table.insert(g.pool, o)
     end
     g.kodo = board:CreateTexture(nil, "OVERLAY")
@@ -238,9 +252,11 @@ ns.RegisterGame({
     length = "kurz",
     icon = ICON,
     keyboard = true,
+    resumeDelay = 3,               -- nach einer Pause erst 3-2-1
+    scoreLabel = L["Metres"],
     width = W, height = H,
-    desc = L["Your kodo runs across the Barrens and keeps getting faster. Jump over cacti and rocks and duck under low-flying vultures. Your score is the distance in metres."],
+    desc = L["Your kodo runs across the Barrens and keeps getting faster. Jump over cacti and rocks, duck under low-flying vultures and rock overhangs. Your score is the distance in metres."],
     controls = L["Space, W, Up arrow or click: jump · S or Down arrow: duck (in the air: land faster)"],
-    controlsShort = L["Space/W/click: jump\nS/Down: duck"],
+    controlsShort = L["Space/W/click: jump\nS/Down: duck\nP/Esc: pause"],
     Create = Create,
 })

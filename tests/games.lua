@@ -194,6 +194,52 @@ gv.scripts.OnKeyUp(gv, "S")
 check(not g.duck, "aufstehen")
 tick(60)
 check(over() and g.score > 10, "Kodo rennt irgendwann in ein Hindernis: " .. g.score .. " m")
+-- Hindernis direkt am Kodo: wer trifft, wer nicht?
+local function kodoWith(kind, duck, h)
+    g = start("kodo")
+    key("SPACE"); g.vh, g.h = 0, h or 0
+    for _, o in ipairs(g.pool) do g:HideObstacle(o) end
+    g.duck = duck
+    local o = g.pool[1]
+    o.active, o.kind, o.x, o.w = true, kind, 60, 30
+    if kind == "geier" then o.top, o.bottom = 330 - 74, 330 - 38
+    elseif kind == "ueberhang" then o.top, o.bottom = 0, 330 - 38
+    else o.top, o.bottom = 330 - 40, 330 end
+    g:Update(0.001)
+    return g.dead
+end
+check(kodoWith("geier", false), "Kodo: Geier trifft stehend")
+check(not kodoWith("geier", true), "Kodo: unter dem Geier weggeduckt")
+check(kodoWith("kaktus", false), "Kodo: Kaktus trifft")
+check(not kodoWith("kaktus", false, 60), "Kodo: über den Kaktus gesprungen")
+check(kodoWith("ueberhang", false), "Kodo: Felsüberhang trifft stehend")
+check(not kodoWith("ueberhang", true), "Kodo: unter dem Felsüberhang durchgerutscht")
+check(kodoWith("ueberhang", false, 100), "Kodo: Felsüberhang kann man nicht überspringen")
+check(ns.overlay.text.text:find(ns.gamesById.kodo.scoreLabel .. ": ", 1, true) and not ns.overlay.text.text:find(ns.L["Points"], 1, true),
+    "Kodo: Spielende zeigt Meter statt Punkte: " .. ns.overlay.text.text)
+-- Überhänge erst ab 60 m, dann regelmäßig
+g = start("kodo"); key("SPACE")
+local kinds = {}
+for _, sc in ipairs({ 0, 100 }) do
+    kinds[sc] = {}
+    for _ = 1, 400 do
+        for _, o in ipairs(g.pool) do g:HideObstacle(o) end
+        g.score = sc; g:NewObstacle()
+        kinds[sc][g.pool[1].kind] = (kinds[sc][g.pool[1].kind] or 0) + 1
+    end
+end
+check(not kinds[0].ueberhang and not kinds[0].geier, "Kodo: unter 60 m nur Kakteen und Felsen")
+check((kinds[100].ueberhang or 0) > 40 and not kinds[100].geier, "Kodo: ab 60 m Überhänge (" .. (kinds[100].ueberhang or 0) .. "/400)")
+-- Countdown nach der Pause
+key("P"); ns.Resume()
+check(ns.run.countdown == 3, "Kodo: Countdown nach Pause")
+-- Sprunghöhe und Luftzeit
+g = start("kodo"); key("SPACE")
+for _, o in ipairs(g.pool) do g:HideObstacle(o) end
+g.nextGap = 1e9
+local peak, air = 0, 0
+repeat g:Update(0.01); air = air + 0.01; peak = math.max(peak, g.h) until g.h <= 0 or air > 2
+check(peak > 120 and peak < 160 and air > 0.55 and air < 0.75, ("Kodo: Sprung %.0f px hoch, %.2f s in der Luft"):format(peak, air))
 
 -- Mauerbrecher -----------------------------------------------------------------
 g = start("breakout")

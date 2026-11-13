@@ -167,6 +167,7 @@ local DEFAULTS = {
     settings = { autoOpen = true, landAlarm = true, hideInCombat = true, sound = true },
     scores = {}, stats = {}, routes = {}, minimap = {}, collapsed = {}, modes = {},
     frame = false, lastGame = false, debug = false, log = {}, logSession = 0,
+    blackjack = { gold = 100, peak = 100 },   -- Goblin-Gold bleibt zwischen Partien erhalten
 }
 
 local function fill(t, defaults)

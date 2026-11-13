@@ -454,14 +454,35 @@ local BJ = start("blackjack")
 check(BJ.Total({ { rank = 1 }, { rank = 13 } }) == 21, "A+K = 21")
 check(BJ.Total({ { rank = 1 }, { rank = 1 }, { rank = 9 } }) == 21, "A+A+9 = 21")
 check(BJ.Total({ { rank = 10 }, { rank = 5 }, { rank = 9 } }) == 24, "überkauft = 24")
+-- Einsätze wachsen mit dem Gold: 10, ¼, ½
+local b1, b2 = BJ.Bets(100), BJ.Bets(2000)
+check(b1[1] == 10 and b1[2] == 25 and b1[3] == 50 and b2[2] == 500 and b2[3] == 1000, "Blackjack: Einsätze 10 / ¼ / ½")
+-- Gold bleibt erhalten: auch nach Neustart und mitten in der Hand abgebucht
+PastimeDB.blackjack.gold, PastimeDB.blackjack.peak = 400, 700
 g = start("blackjack")
-for hand = 1, 12 do
+check(g.gold == 400 and g.score == 700, "Blackjack: Gold und Höchststand geladen")
+key("3")
+check(PastimeDB.blackjack.gold == 200, "Blackjack: Einsatz sofort abgebucht und gespeichert")
+g = start("blackjack")
+check(g.gold == 200 and g.state == "bet", "Blackjack: Verlassen mitten in der Hand kostet den Einsatz")
+-- viele Hände: keine Rundengrenze mehr
+for _ = 1, 15 do
     if over() then break end
-    key("1")
+    if g.state == "bet" then key("1") end
     if g.state == "play" then key(ns.KEYS.stand) end
     for _ = 1, 60 do tick(0.1); if g.state == "bet" or over() then break end end
 end
-check(over(), "Blackjack endet nach zehn Runden oder pleite (Gold " .. g.gold .. ", Runde " .. g.hand .. ")")
+check(over() or g.state == "bet", "Blackjack: läuft ohne 10-Runden-Grenze weiter")
+-- Pleite: Höchststand wird gewertet, danach wieder 100 Gold
+g = start("blackjack")
+g.gold, g.peak = 10, 2000
+key("1")
+g.state, g.player, g.dealer, g.hole = "play", { { rank = 10, suit = 1 }, { rank = 9, suit = 2 } }, { { rank = 10, suit = 3 }, { rank = 10, suit = 4 } }, false
+g:Settle()
+tick(2)
+check(over() and best("blackjack") == 2000, "Blackjack: pleite – Höchststand 2000 gewertet")
+check(PastimeDB.blackjack.gold == 100 and PastimeDB.blackjack.peak == 100, "Blackjack: neuer Lauf mit 100 Gold")
+check(ns.overlay.text.text:find(ns.gamesById.blackjack.scoreLabel, 1, true), "Blackjack: Spielende zeigt den höchsten Goldstand")
 -- Goblin bleibt bei weicher 17 stehen, 18 gegen 17 gewinnt
 g = start("blackjack")
 g.gold, g.bet, g.state, g.t = 90, 10, "dealer", 0
@@ -496,7 +517,8 @@ check(g:CanPlace({ { rank = 7, suit = 1 } }, { where = "tab", pile = 1 }), "rote
 check(not g:CanPlace({ { rank = 7, suit = 4 } }, { where = "tab", pile = 1 }), "schwarze 7 nicht auf schwarze 8")
 g.tab[2] = {}
 check(g:CanPlace({ { rank = 13, suit = 2 } }, { where = "tab", pile = 2 }) and not g:CanPlace({ { rank = 12, suit = 2 } }, { where = "tab", pile = 2 }), "leere Spalte nur König")
-check(g:CanPlace({ { rank = 1, suit = 2 } }, { where = "found", pile = 1 }), "Ass auf leeres Ziel")
+check(g:CanPlace({ { rank = 1, suit = 2 } }, { where = "found", pile = 2 }), "Karo-Ass auf den Karo-Platz")
+check(not g:CanPlace({ { rank = 1, suit = 2 } }, { where = "found", pile = 1 }), "Karo-Ass nicht auf den Herz-Platz")
 -- Fast gewonnen: alles bis auf die Könige liegt ab -> automatisch abräumen
 g = start("solitaer")
 g.stock, g.waste = {}, {}
@@ -521,6 +543,36 @@ g:Click({ where = "tab", pile = 1, index = 2, card = g.tab[1][2] }, "LeftButton"
 check(g.sel and g.sel.pile == 1, "Herz 4 gewählt")
 g:Click({ where = "tab", pile = 2, index = 2, card = g.tab[2][2] }, "LeftButton")
 check(#g.tab[2] == 3 and #g.tab[1] == 1 and g.tab[1][1].up, "Herz 4 auf Pik 5 gelegt, darunter aufgedeckt")
+-- Klick auf eine passende Karte: ab auf ihren Farbstapel
+g = start("solitaer")
+g.stock, g.waste = {}, { { rank = 1, suit = 4, up = true } }      -- Kreuz-Ass
+g:Render()
+g:Click({ where = "waste", card = g.waste[1] }, "LeftButton")
+check(#g.found[4] == 1 and #g.waste == 0 and g.sel == nil, "Klick: Kreuz-Ass auf den Kreuz-Platz")
+-- Ziehen mit der Maus: Herz 4 auf Pik 5
+g = start("solitaer")
+g.stock, g.waste = {}, {}
+for i = 1, 7 do g.tab[i] = { { rank = 13, suit = 3, up = true } } end
+g.tab[1] = { { rank = 4, suit = 1, up = true } }
+g.tab[3] = { { rank = 5, suit = 3, up = true } }
+g:Render()
+local drag
+for _, f in ipairs(g.pool) do if f:IsShown() and f.card == g.tab[1][1] then drag = f end end
+check(g:LocAt(30, 40) == nil and g:LocAt(200, 40).where == "found" and g:LocAt(200, 40).pile == 1
+    and g:LocAt(150, 200).pile == 3, "Maus: Stelle unter dem Zeiger")
+g.CursorXY = function() return drag.px + 10, drag.py + 10 end
+g:DragStart(drag)
+check(g.drag and #g.drag.frames == 1, "Maus: Karte aufgenommen")
+g.CursorXY = function() return 6 + 2 * 60 + 10, 92 + 30 end
+tick(0.05)
+g:DragStop()
+check(#g.tab[3] == 2 and #g.tab[1] == 0 and g.drag == nil, "Maus: Herz 4 auf Pik 5 gezogen")
+g.CursorXY = function() return 6 + 2 * 60 + 10, 92 + 50 end
+for _, f in ipairs(g.pool) do if f:IsShown() and f.card == g.tab[3][2] then drag = f end end
+g:DragStart(drag)
+g.CursorXY = function() return 6 + 5 * 60 + 10, 92 + 50 end
+g:DragStop()
+check(#g.tab[3] == 2, "Maus: ungültiges Ziel – Karte bleibt liegen")
 
 -- Zufallstest: alle Spiele mit wilden Tasten ---------------------------------------
 local KEYS = { "UP", "DOWN", "LEFT", "RIGHT", "W", "A", "S", "D", "SPACE", "ENTER", "1", "2", "3", "4", "5", "6", "7",

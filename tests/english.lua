@@ -12,7 +12,12 @@ local function key(k)
     gv.scripts.OnKeyDown(gv, k)
     gv.scripts.OnKeyUp(gv, k)
 end
-local GERMAN = "[äöüÄÖÜß]"
+-- Umlaute als ganze UTF-8-Zeichen suchen (eine Byte-Klasse träfe auch ¼ und ½)
+local UMLAUTS = { "ä", "ö", "ü", "Ä", "Ö", "Ü", "ß" }
+local function hasGerman(s)
+    for _, u in ipairs(UMLAUTS) do if s:find(u, 1, true) then return true end end
+    return false
+end
 
 fire("ADDON_LOADED", "Pastime")
 fire("PLAYER_LOGIN")
@@ -23,7 +28,7 @@ check(#ns.games == 19, "19 games")
 local names = {}
 for _, g in ipairs(ns.games) do
     names[g.id] = g.name
-    check(not (g.name .. (g.short or "") .. (g.desc or "") .. (g.controls or "")):find(GERMAN), "English texts for " .. g.id)
+    check(not hasGerman(g.name .. (g.short or "") .. (g.desc or "") .. (g.controls or "")), "English texts for " .. g.id)
 end
 check(names.kniffel == "Tavern Dice" and names.memory == "Rune Pairs" and names.simon == "Totem Echo"
     and names.viergewinnt == "Four in a Row", "renamed games")
@@ -41,7 +46,7 @@ slash("")
 check(ns.frame:IsShown(), "/pastime opens the window")
 local german = {}
 for _, f in ipairs(ALLFRAMES) do
-    if type(f.text) == "string" and f.text:find(GERMAN) then table.insert(german, f.text) end
+    if type(f.text) == "string" and hasGerman(f.text) then table.insert(german, f.text) end
 end
 check(#german == 0, "no German text in the UI: " .. table.concat(german, " | "))
 
@@ -50,7 +55,7 @@ CHAT = {}
 slash("help")
 check(#CHAT >= 8 and CHAT[1]:find("/pastime"), "help lists commands")
 local helpGerman = false
-for _, l in ipairs(CHAT) do if l:find(GERMAN) then helpGerman = true end end
+for _, l in ipairs(CHAT) do if hasGerman(l) then helpGerman = true end end
 check(not helpGerman, "help text is English")
 local before = PastimeDB.settings.sound
 slash("sound")
@@ -136,7 +141,7 @@ ns.ShowLauncher()
 -- Kein Text mit deutschen Umlauten nach allen Spielstarts
 german = {}
 for _, f in ipairs(ALLFRAMES) do
-    if type(f.text) == "string" and f.text:find(GERMAN) then table.insert(german, f.text) end
+    if type(f.text) == "string" and hasGerman(f.text) then table.insert(german, f.text) end
 end
 check(#german == 0, "no German text after starting every game: " .. table.concat(german, " | "))
 

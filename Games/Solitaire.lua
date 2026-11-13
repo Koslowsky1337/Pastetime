@@ -55,7 +55,8 @@ function Game:CanPlace(cards, dst)
     local c = cards[1]
     if not c then return false end
     if dst.where == "found" then
-        if #cards ~= 1 then return false end
+        -- feste Plätze: Ablage 1–4 = Herz, Karo, Pik, Kreuz
+        if #cards ~= 1 or c.suit ~= dst.pile then return false end
         local f = self.found[dst.pile]
         local top = f[#f]
         if not top then return c.rank == 1 end
@@ -94,13 +95,9 @@ end
 
 function Game:ToFoundation(src)
     local cards = self:Taking(src)
-    if #cards ~= 1 then return false end
-    for f = 1, 4 do
-        if self:CanPlace(cards, { where = "found", pile = f }) then
-            return self:Move(src, { where = "found", pile = f })
-        end
-    end
-    return false
+    if #cards ~= 1 or src.where == "found" then return false end
+    local dst = { where = "found", pile = cards[1].suit }
+    return self:CanPlace(cards, dst) and self:Move(src, dst) or false
 end
 
 function Game:DrawStock()
@@ -165,7 +162,75 @@ function Game:Click(loc, button)
         end
         return self:Render()
     end
+    -- passende oberste Karte wandert per Klick gleich auf ihren Farbstapel
+    if loc.card and loc.card.up and (loc.where == "waste" or (loc.where == "tab" and loc.index == #self.tab[loc.pile]))
+        and self:ToFoundation(loc) then
+        return self:Render()
+    end
     self:Select(loc)
+    self:Render()
+end
+
+-- Ziehen mit der Maus ----------------------------------------------------------
+-- Stelle unter einem Punkt des Spielfelds (x nach rechts, y nach unten)
+function Game:LocAt(x, y)
+    local i = math.floor((x - 3) / 60) + 1           -- 54 px Karte + 6 px Lücke je Spalte
+    if i < 1 or i > 7 then return nil end
+    if y < TABY - 6 then
+        return i >= 4 and { where = "found", pile = i - 3 } or nil
+    end
+    return { where = "tab", pile = i }
+end
+
+function Game:CursorXY()
+    local b = self.board
+    local cx, cy = GetCursorPosition()
+    local s, l, t = b:GetEffectiveScale(), b:GetLeft(), b:GetTop()
+    if not (cx and s and l and t) then return nil end
+    return cx / s - l, t - cy / s
+end
+
+function Game:DragStart(frame)
+    local loc = frame.loc
+    if self.done or self.auto or not (loc and loc.card and loc.card.up) or loc.where == "stock" then return end
+    self.sel = nil
+    self:Select(loc)
+    local src = self.sel
+    self.sel = nil
+    if not src then return end
+    local cards = {}
+    for _, c in ipairs(self:Taking(src)) do cards[c] = true end
+    local frames = {}
+    for _, f in ipairs(self.pool) do
+        if f:IsShown() and f.card and cards[f.card] then frames[#frames + 1] = f end
+    end
+    table.sort(frames, function(a, b) return a.py < b.py end)
+    local x, y = self:CursorXY()
+    self.drag = { src = src, frames = frames, dx = (x or frame.px) - frame.px, dy = (y or frame.py) - frame.py, top = frames[1] }
+    for k, f in ipairs(frames) do f:SetFrameLevel(self.baseLevel + 80 + k) end
+end
+
+function Game:DragMove()
+    local d = self.drag
+    local x, y = self:CursorXY()
+    if not (d and x) then return end
+    local x0, y0 = x - d.dx, y - d.dy
+    for k, f in ipairs(d.frames) do
+        f:ClearAllPoints()
+        f:SetPoint("TOPLEFT", self.board, "TOPLEFT", x0, -(y0 + (f.py - d.top.py)))
+    end
+end
+
+function Game:DragStop()
+    local d = self.drag
+    if not d then return end
+    self.drag = nil
+    local x, y = self:CursorXY()
+    if x and not self.done then
+        -- Mitte der gezogenen Karte zählt, nicht die Mausspitze
+        local dst = self:LocAt(x - d.dx + CW / 2, y - d.dy + CH / 2)
+        if dst then self:Move(d.src, dst) end
+    end
     self:Render()
 end
 
@@ -181,6 +246,7 @@ end
 
 function Game:Update(dt)
     if self.started and not self.done then self.time = self.time + dt end
+    if self.drag then self:DragMove() end
     if self.auto then
         self.auto = self.auto - dt
         if self.auto <= 0 then
@@ -230,7 +296,7 @@ function Game:Render()
         f:SetFrameLevel(self.baseLevel + level)
         f:SetCard(card, up)
         f:SetSelected(selCards[card] or false)
-        f.loc = loc
+        f.loc, f.px, f.py = loc, x, y
     end
     -- Nachziehstapel
     self.stockSlot.label:SetText(#self.waste > 0 and L["reshuffle"] or "")
@@ -292,8 +358,18 @@ local function Create(host, board)
     end
     g.stockSlot = slot(colX(1), TOPY, { where = "stock" }, "")
     slot(colX(2), TOPY, { where = "waste" })
+    -- feste Farbplätze: Zeichen + Edelstein der Farbe, solange leer
     for f = 1, 4 do
-        local s = slot(colX(3 + f), TOPY, { where = "found", pile = f }, ns.Cards.RANKS[1])
+        local suit = Cards.SUITS[f]
+        local s = slot(colX(3 + f), TOPY, { where = "found", pile = f }, suit.glyph)
+        if s.label.SetFont then s.label:SetFont("Fonts\\ARIALN.TTF", 26, "") end
+        s.label:ClearAllPoints()
+        s.label:SetPoint("TOP", 0, -6)
+        if suit.red then s.label:SetTextColor(1, 0.4, 0.35) else s.label:SetTextColor(0.85, 0.85, 0.85) end
+        ns.SetIcon(s.icon, suit.icon)
+        s.icon:ClearAllPoints()
+        s.icon:SetPoint("BOTTOM", 0, 8)
+        s.icon:Show()
     end
     for i = 1, 7 do slot(colX(i), TABY, { where = "tab", pile = i }, ns.Cards.RANKS[13]) end
     g.stockCount = ns.FontString(board, "GameFontHighlightSmall", "CENTER")
@@ -306,6 +382,14 @@ local function Create(host, board)
         end)
         f:SetScript("OnDoubleClick", function(self)
             if host:IsRunning() and self.loc then ns.Safe("solitaer", g.Click, g, self.loc, "double") end
+        end)
+        f:RegisterForDrag("LeftButton")
+        f:SetScript("OnDragStart", function(self)
+            if host:IsRunning() then ns.Safe("solitaer", g.DragStart, g, self) end
+        end)
+        f:SetScript("OnDragStop", function()
+            if host:IsRunning() then ns.Safe("solitaer", g.DragStop, g)
+            elseif g.drag then g.drag = nil; g:Render() end
         end)
         g.pool[i] = f
     end
@@ -326,7 +410,7 @@ ns.RegisterGame({
     scoreLabel = L["Time"],
     FormatScore = fmtTime,
     desc = L["The classic: build all cards up by suit from ace to king. In the columns, stack downwards in alternating red and black; only kings may fill an empty column. Your time is your score."],
-    controls = L["Click a card, then its target · Right- or double-click: send to foundation · Click the stock or press Space: draw"],
-    controlsShort = L["Click card, then target\nRight-click: to foundation\nSpace: draw"],
+    controls = L["Drag a card onto its target (or click it, then the target) · Click a fitting card: onto its suit pile · Stock or Space: draw"],
+    controlsShort = L["Drag card to target\nClick: onto suit pile\nSpace: draw"],
     Create = Create,
 })

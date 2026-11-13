@@ -1,16 +1,22 @@
--- Pastime: Goblin-Blackjack – zehn Runden mit Spielgold am Tisch eines Goblins
+-- Pastime: Goblin-Blackjack – Gold bleibt über Partien erhalten; gewertet wird
+-- der höchste Goldstand eines Laufs, sobald der Goblin dir alles abgenommen hat
 local ADDON, ns = ...
 local L = ns.L
 local KEYS = ns.KEYS
 
 local W, H = 420, 440
 local CW, CH, STEP = 60, 84, 36
-local HANDS, START_GOLD = 10, 100
-local BETS = { 10, 25, 50 }
+local START_GOLD, MIN_BET = 100, 10
 local Cards = ns.Cards
 
 local Game = {}
 Game.__index = Game
+
+-- Einsätze: 10 Gold, ¼ und ½ des Golds (auf 5 abgerundet, mindestens 10)
+function Game.Bets(gold)
+    local function part(f) return math.max(MIN_BET, math.floor(gold * f / 5) * 5) end
+    return { MIN_BET, part(0.25), part(0.5) }
+end
 
 function Game.Total(hand)
     local t, aces = 0, 0
@@ -31,25 +37,35 @@ function Game:Draw()
     return table.remove(self.deck)
 end
 
+-- Kontostand sofort sichern: wer mitten in der Hand geht, verliert den Einsatz
+function Game:Save()
+    local b = ns.DB.blackjack
+    b.gold, b.peak = self.gold, self.peak
+end
+
 function Game:Start()
+    local b = ns.DB.blackjack
+    if (tonumber(b.gold) or 0) < MIN_BET then b.gold, b.peak = START_GOLD, START_GOLD end
     self.deck = Cards.Shuffle(Cards.NewDeck())
-    self.gold, self.hand, self.score = START_GOLD, 0, START_GOLD
+    self.gold = b.gold
+    self.peak = math.max(tonumber(b.peak) or 0, self.gold)
+    self.score = self.peak
     self.player, self.dealer = {}, {}
     self.state, self.bet = "bet", 0
     self.msg:SetText(L["Place your bet!"])
-    self.sub:SetText((L["Hand 1 of %d"]):format(HANDS))
+    self.sub:SetText((L["Best this run: %d gold"]):format(self.peak))
     self:Render()
 end
 
-function Game:PlaceBet(amount)
-    if self.state ~= "bet" or amount > self.gold then return end
+function Game:PlaceBet(i)
+    local amount = Game.Bets(self.gold)[i]
+    if self.state ~= "bet" or not amount or amount > self.gold then return end
     self.bet = amount
     self.gold = self.gold - amount
-    self.hand = self.hand + 1
+    self:Save()
     self.player = { self:Draw(), self:Draw() }
     self.dealer = { self:Draw(), self:Draw() }
     self.hole = true
-    self.doubled = false
     self.host:Sound("click")
     if isBlackjack(self.player) or isBlackjack(self.dealer) then
         self.hole = false
@@ -77,7 +93,7 @@ function Game:Double()
     if self.state ~= "play" or #self.player ~= 2 or self.gold < self.bet then return end
     self.gold = self.gold - self.bet
     self.bet = self.bet * 2
-    self.doubled = true
+    self:Save()
     table.insert(self.player, self:Draw())
     if Game.Total(self.player) > 21 then
         self.hole = false
@@ -113,7 +129,9 @@ function Game:Settle()
         win, text = 0, (L["You lose – %d against %d."]):format(p, d)
     end
     self.gold = self.gold + win
-    self.score = self.gold
+    self.peak = math.max(self.peak, self.gold)
+    self.score = self.peak
+    self:Save()
     local diff = win - self.bet
     self.msg:SetText(diff > 0 and ("|cff80ff80+%d Gold|r"):format(diff) or (diff < 0 and ("|cffff6060%d Gold|r"):format(diff) or "±0"))
     self.sub:SetText(text)
@@ -143,25 +161,26 @@ end
 
 function Game:NextHand()
     if self.state ~= "result" then return end
-    if self.hand >= HANDS or self.gold < BETS[1] then
+    if self.gold < MIN_BET then
+        -- Pleite: der Lauf ist vorbei, gewertet wird der höchste Goldstand
         self.state = "over"
         self:Render()
-        if self.gold < BETS[1] then
-            return self.host:Over({ submit = false, title = L["Broke!"], text = L["The goblin took your last coin."] })
-        end
-        return self.host:Over({ score = self.gold, won = self.gold > START_GOLD,
-            text = (L["After %d hands: %d goblin gold (start: %d)"]):format(HANDS, self.gold, START_GOLD) })
+        local peak = self.peak
+        local b = ns.DB.blackjack
+        b.gold, b.peak = START_GOLD, START_GOLD
+        return self.host:Over({ score = peak, title = L["Broke!"],
+            text = L["The goblin took your last coin."] .. "\n" .. (L["You start again with %d gold."]):format(START_GOLD) })
     end
     self.state = "bet"
     self.player, self.dealer, self.bet = {}, {}, 0
     self.msg:SetText(L["Place your bet!"])
-    self.sub:SetText((L["Hand %d of %d"]):format(self.hand + 1, HANDS))
+    self.sub:SetText((L["Best this run: %d gold"]):format(self.peak))
     self:Render()
 end
 
 function Game:Key(k, down)
     local act
-    if k == "1" or k == "2" or k == "3" then act = function() self:PlaceBet(BETS[tonumber(k)]) end
+    if k == "1" or k == "2" or k == "3" then act = function() self:PlaceBet(tonumber(k)) end
     elseif k == KEYS.hit or k == "SPACE" then act = function() if self.state == "result" then self:NextHand() else self:Hit() end end
     elseif k == KEYS.stand or k == "ENTER" then act = function() self:Stand() end
     elseif k == KEYS.double then act = function() self:Double() end
@@ -191,9 +210,11 @@ function Game:Render()
     self.playerTotal:SetText(#self.player > 0 and tostring(Game.Total(self.player)) or "")
     self.goldText:SetText((L["Goblin gold: |cffffffff%d|r%s"]):format(self.gold or 0, (self.bet or 0) > 0 and (L["  ·  Bet: %d"]):format(self.bet) or ""))
     local betting = self.state == "bet"
+    local amounts = Game.Bets(self.gold or START_GOLD)
     for i, b in ipairs(self.betButtons) do
         b:SetShown(betting)
-        b:SetEnabled((self.gold or 0) >= BETS[i])
+        b:SetText((L["Bet %d (%d)"]):format(amounts[i], i))
+        b:SetEnabled((self.gold or 0) >= amounts[i])
     end
     local playing = self.state == "play"
     self.hitBtn:SetShown(playing)
@@ -205,7 +226,6 @@ end
 
 function Game:Info()
     return {
-        { L["Hand"], ("%d/%d"):format(math.max(1, self.hand or 0), HANDS) },
         { L["Gold"], tostring(self.gold or START_GOLD) },
         { L["Bet"], tostring(self.bet or 0) },
     }
@@ -213,7 +233,7 @@ end
 
 local function Create(host, board)
     local g = setmetatable({ host = host, board = board, dealerCards = {}, playerCards = {}, betButtons = {},
-        score = START_GOLD, gold = START_GOLD, hand = 0, player = {}, dealer = {} }, Game)
+        score = START_GOLD, gold = START_GOLD, peak = START_GOLD, player = {}, dealer = {} }, Game)
     local felt = ns.NewTexture(board, "BACKGROUND")
     felt:SetAllPoints()
     if CreateColor then felt:SetGradient("VERTICAL", CreateColor(0.03, 0.18, 0.08, 1), CreateColor(0.06, 0.3, 0.13, 1)) end
@@ -250,8 +270,8 @@ local function Create(host, board)
         b:SetPoint("BOTTOMLEFT", board, "BOTTOMLEFT", x, 10)
         return b
     end
-    for i, amount in ipairs(BETS) do
-        g.betButtons[i] = btn((L["Bet %d (%d)"]):format(amount, i), 126, 8 + (i - 1) * 136, function() g:PlaceBet(amount) end)
+    for i = 1, 3 do
+        g.betButtons[i] = btn("", 126, 8 + (i - 1) * 136, function() g:PlaceBet(i) end)
     end
     g.hitBtn = btn(L["Hit (%s)"]:format(KEYS.hit), 126, 8, function() g:Hit() end)
     g.standBtn = btn(L["Stand (%s)"]:format(KEYS.stand), 126, 144, function() g:Stand() end)
@@ -269,10 +289,11 @@ ns.RegisterGame({
     length = "kurz",
     icon = "Interface\\Icons\\INV_Misc_Coin_01",
     keyboard = true,
-    noLandingScore = true,     -- nur volle zehn Runden zählen
+    noLandingScore = true,     -- gewertet wird erst, wenn ein Lauf pleite endet
+    scoreLabel = L["Highest gold"],
     width = W, height = H,
-    desc = L["Get as close to 21 as you can without going bust – the goblin draws to 17. You start with 100 goblin gold and play ten hands. Your gold at the end is your score. Blackjack pays 3 to 2."],
-    controls = L["1/2/3: bet (10/25/50) · %s or Space: hit · %s or Enter: stand · %s: double"]:format(KEYS.hit, KEYS.stand, KEYS.double),
+    desc = L["Get close to 21 without going bust – the goblin draws to 17. Your goblin gold carries over between games, so you can work your way up. When you go broke, your highest gold counts. Blackjack pays 3 to 2."],
+    controls = L["1/2/3: bet 10, ¼ or ½ of your gold · %s or Space: hit · %s or Enter: stand · %s: double"]:format(KEYS.hit, KEYS.stand, KEYS.double),
     controlsShort = L["1–3: bet · %s: hit\n%s: stand · %s: double"]:format(KEYS.hit, KEYS.stand, KEYS.double),
     Create = Create,
 })

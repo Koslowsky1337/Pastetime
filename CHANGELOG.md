@@ -1,5 +1,23 @@
 # Changelog
 
+## 1.0.0-beta1 – first beta
+
+All 19 games have been reviewed. Please report anything odd on GitHub.
+
+**All games**
+- Real-time games (Wind Serpent, Wind Rider, Kodo Dash, Kobold Bash, Rockfall, Wallbreaker, Murloc Invasion) show a 3-2-1 countdown when you resume after a pause, a landing or a fight.
+- Score popups and messages are no longer hidden under the game board.
+- The sidebar always shows how to pause.
+- Your faction matters: Four in a Row, minefield flags, card and rune backs show Horde or Alliance.
+
+**Games**
+- Kodo Dash: new rock overhangs to slide under; the score is now shown as metres.
+- Goblin Blackjack: your gold carries over between games and bets grow with it; going broke scores the highest gold of the run.
+- Solitaire: drag cards with the mouse, a click sends a fitting card to its suit pile, fixed piles for each suit.
+- Rockfall: a short lock delay lets you slide a landed block.
+- Rune Pairs: clicking a third card covers a wrong pair at once.
+- Smaller fixes for Fishing, Tavern Dice, Totem Echo, Wallbreaker and Word Guess.
+
 ## 1.0.0-alpha1 – test build
 
 First automatic CurseForge build, mainly to test the packaging. The games are still being reviewed one by one.

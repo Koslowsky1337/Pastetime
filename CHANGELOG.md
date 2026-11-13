@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.0.0-alpha1 – test build
+
+First automatic CurseForge build, mainly to test the packaging. The games are still being reviewed one by one.
+
+- Wind Serpent: speeds up every 8 eggs instead of every egg; the sidebar shows the level. Fixed a gap in the body when the head follows the tail closely.
+- Wind Serpent and Wind Rider: 3-2-1 countdown after a pause, so you don't crash right away.
+- After game over, Space restarts only after 1.5 seconds (the button works at once).
+- Game details and route records: the parchment now fills the whole panel; the route line uses the full width.
+
 ## 1.0.0 – first public release
 
 - 19 mini-games in three categories: Arcade, Puzzles, Dice & Cards.

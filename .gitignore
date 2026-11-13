@@ -1,2 +1,63 @@
 *.zip
 .release/
+
+# WoW: Spieldaten gehören nie ins Repo
+WTF/
+SavedVariables/
+Screenshots/
+
+# Secrets & lokale Konfiguration
+.env
+.env.*
+!.env.example
+.claude/settings.local.json
+*.pem
+*.key
+*.p12
+*.pfx
+*.ppk
+*.jks
+*.keystore
+*.p8
+id_rsa*
+id_ed25519*
+.git-credentials
+credentials.json
+token.json
+token.pickle
+client_secret*.json
+appsettings.Secrets.json
+secrets.json
+secrets.yml
+secrets.yaml
+secrets.toml
+DataProtection-Keys/
+
+# Infrastruktur & Deployment
+*.pubxml.user
+*.tfstate
+*.tfstate.*
+*.ovpn
+kubeconfig
+
+# Daten, Backups, Logs
+*.sqlite
+*.sqlite3
+*.db
+*.bak
+*.dump
+*.log
+*.dmp
+
+# Umgebungen, Build & Editor
+venv/
+.venv/
+node_modules/
+.vs/
+.idea/
+*.user
+*.suo
+.bash_history
+.zsh_history
+.python_history
+__pycache__/

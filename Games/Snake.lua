@@ -3,7 +3,11 @@ local ADDON, ns = ...
 local L = ns.L
 
 local COLS, ROWS, SIZE = 21, 21, 20
-local BG_A, BG_B = { 0.17, 0.13, 0.08 }, { 0.20, 0.155, 0.095 }    -- Brachland-Erde im Schachbrett
+-- Boden im Schachbrett: Horde Brachland-Erde, Allianz Wiese im Wald von Elwynn
+local GROUND = {
+    Horde = { { 0.17, 0.13, 0.08 }, { 0.20, 0.155, 0.095 } },
+    Alliance = { { 0.10, 0.17, 0.07 }, { 0.12, 0.20, 0.085 } },
+}
 local BODY_A, BODY_B = { 0.22, 0.70, 0.78 }, { 0.17, 0.58, 0.68 }  -- türkise Schuppen
 local ICON_HEAD = "Interface\\Icons\\Ability_Hunter_Pet_WindSerpent"
 local ICON_EGG = "Interface\\Icons\\INV_Pet_BlueMurlocEgg"
@@ -28,13 +32,15 @@ end
 function Game:PaintCell(x, y, body)
     local c
     if body then c = ((x + y) % 2 == 0) and BODY_A or BODY_B
-    else c = ((x + y) % 2 == 0) and BG_A or BG_B end
+    else c = ((x + y) % 2 == 0) and self.bgA or self.bgB end
     self.grid:Set(x, y, c[1], c[2], c[3], body)
 end
 
 function Game:Level() return 1 + math.floor(self.eaten / 8) end
 
 function Game:Start()
+    local gr = GROUND[ns.IsAlliance() and "Alliance" or "Horde"]
+    self.bgA, self.bgB = gr[1], gr[2]
     self.snake = { { x = 11, y = 11 }, { x = 10, y = 11 }, { x = 9, y = 11 } }
     self.occ = {}
     self.dir, self.queue = { 1, 0 }, {}
@@ -218,6 +224,9 @@ ns.RegisterGame({
     width = COLS * SIZE, height = ROWS * SIZE,
     desc = L["The classic: steer the wind serpent across the Barrens, eat murloc eggs and grow longer and longer. Now and then a pearl glitters – grab it before it disappears. Don't hit the rocks or your own tail!"],
     controls = L["Arrow keys or WASD to steer · P or Esc pauses"],
+    alliance = {
+        desc = L["The classic: steer the wind serpent through Elwynn Forest, eat murloc eggs and grow longer and longer. Now and then a pearl glitters – grab it before it disappears. Don't hit the rocks or your own tail!"],
+    },
     controlsShort = L["Arrows/WASD: steer"],
     Create = Create,
 })

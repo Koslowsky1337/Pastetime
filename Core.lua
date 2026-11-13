@@ -231,6 +231,17 @@ function ns.RegisterGame(def)
     return def
 end
 
+-- Beim Login: Farbschema der Fraktion wählen und für die Allianz die Varianten der
+-- Spiele übernehmen (def.alliance = { name, desc, icon, ... }). Id und Bestenliste bleiben.
+function ns.ApplyFaction()
+    local ally = ns.IsAlliance()
+    ns.THEME = ns.THEMES[ally and "Alliance" or "Horde"]
+    if not ally then return end
+    for _, def in ipairs(ns.games) do
+        for k, v in pairs(def.alliance or {}) do def[k] = v end
+    end
+end
+
 function ns.FindGame(query)
     query = (query or ""):lower()
     if query == "" then return nil end
@@ -595,6 +606,7 @@ ev:SetScript("OnEvent", ns.Wrap("event", function(_, event, ...)
 
     elseif event == "PLAYER_LOGIN" then
         ns.playerName = UnitName("player")
+        ns.ApplyFaction()          -- vor allen Fenstern, die Farben und Namen lesen
         local build, buildNum = "?", "?"
         if GetBuildInfo then build, buildNum = GetBuildInfo() end
         ns.Log("I", "start", "Pastime %s · Client %s (%s) · %s · %s", ns.VERSION, tostring(build),

@@ -10,8 +10,16 @@ local GRAVITY, FLAP, MAXFALL = 1250, -365, 540
 local SPIRE_W, CAP_W, CAP_H = 54, 64, 14
 local SPACING = 225
 local ICON = "Interface\\Icons\\Ability_Mount_Wyvern_01"
-local ROCK = { 0.56, 0.33, 0.20 }
-local ROCK_DARK = { 0.40, 0.23, 0.14 }
+local ICON_GRYPHON = "Interface\\Icons\\Ability_Mount_Gryphon_01"
+-- Horde: Windreiter durch Tausend Nadeln · Allianz: Greif über den Gipfeln von Dun Morogh
+local LOOK = {
+    Horde = { icon = ICON, skyLow = { 0.85, 0.45, 0.25 }, skyHigh = { 0.12, 0.13, 0.32 }, mesa = { 0.32, 0.18, 0.16 },
+        rock = { 0.56, 0.33, 0.20 }, rockDark = { 0.40, 0.23, 0.14 }, ground = { 0.45, 0.30, 0.16 }, edge = { 0.25, 0.15, 0.08 },
+        crash = L["Crash landing in the canyon!"] },
+    Alliance = { icon = ICON_GRYPHON, skyLow = { 0.78, 0.84, 0.95 }, skyHigh = { 0.22, 0.32, 0.58 }, mesa = { 0.58, 0.62, 0.72 },
+        rock = { 0.62, 0.64, 0.70 }, rockDark = { 0.44, 0.47, 0.55 }, ground = { 0.88, 0.90, 0.95 }, edge = { 0.55, 0.60, 0.70 },
+        crash = L["Crash landing in the snow!"] },
+}
 
 local KEYS = { SPACE = true, UP = true, W = true }
 
@@ -63,7 +71,26 @@ function Game:HideSpire(s)
     for _, t in ipairs(s.texs) do t:Hide() end
 end
 
+-- Aussehen je Fraktion (bei jedem Start; Spielfelder entstehen erst nach dem Login)
+function Game:ApplyLook()
+    local T = LOOK[ns.IsAlliance() and "Alliance" or "Horde"]
+    self.look = T
+    if CreateColor and self.sky.SetGradient then
+        self.sky:SetGradient("VERTICAL", CreateColor(T.skyLow[1], T.skyLow[2], T.skyLow[3], 1),
+            CreateColor(T.skyHigh[1], T.skyHigh[2], T.skyHigh[3], 1))
+    end
+    for _, m in ipairs(self.mesas) do ns.Paint(m.tex, T.mesa[1], T.mesa[2], T.mesa[3], 1, 0.75) end
+    for _, sp in ipairs(self.pool) do
+        paintH(sp.topCol, T.rock, 0.6); paintH(sp.botCol, T.rock, 0.6)
+        paintH(sp.topCap, T.rockDark, 0.7); paintH(sp.botCap, T.rockDark, 0.7)
+    end
+    ns.Paint(self.ground, T.ground[1], T.ground[2], T.ground[3], 1, 0.6)
+    ns.Paint(self.edge, T.edge[1], T.edge[2], T.edge[3], 1)
+    ns.SetIcon(self.player, T.icon)
+end
+
 function Game:Start()
+    self:ApplyLook()
     self.y, self.vy = BH / 2 - 30, 0
     self.score, self.waiting, self.dead = 0, true, false
     self.bob = 0
@@ -155,7 +182,7 @@ function Game:Update(dt)
     if self.y + R >= BH - GROUND then
         self.y = BH - GROUND - R
         self:PlacePlayer()
-        return self:Crash(L["Crash landing in the canyon!"])
+        return self:Crash(self.look.crash)
     end
 end
 
@@ -171,6 +198,7 @@ local function Create(host, board)
 
     -- Himmel in Abendfarben
     local sky = ns.NewTexture(board, "BACKGROUND")
+    g.sky = sky
     sky:SetAllPoints()
     if CreateColor and sky.SetGradient then
         sky:SetGradient("VERTICAL", CreateColor(0.85, 0.45, 0.25, 1), CreateColor(0.12, 0.13, 0.32, 1))
@@ -191,10 +219,10 @@ local function Create(host, board)
     -- Felsnadeln (Vorrat)
     for i = 1, 4 do
         local s = { texs = {} }
-        s.topCol = rockTex(board); paintH(s.topCol, ROCK, 0.6)
-        s.botCol = rockTex(board); paintH(s.botCol, ROCK, 0.6)
-        s.topCap = rockTex(board, "ARTWORK"); s.topCap:SetSize(CAP_W, CAP_H); paintH(s.topCap, ROCK_DARK, 0.7)
-        s.botCap = rockTex(board, "ARTWORK"); s.botCap:SetSize(CAP_W, CAP_H); paintH(s.botCap, ROCK_DARK, 0.7)
+        s.topCol = rockTex(board)
+        s.botCol = rockTex(board)
+        s.topCap = rockTex(board, "ARTWORK"); s.topCap:SetSize(CAP_W, CAP_H)
+        s.botCap = rockTex(board, "ARTWORK"); s.botCap:SetSize(CAP_W, CAP_H)
         s.texs = { s.topCol, s.botCol, s.topCap, s.botCap }
         for _, t in ipairs(s.texs) do t:Hide() end
         table.insert(g.pool, s)
@@ -204,16 +232,15 @@ local function Create(host, board)
     ground:SetPoint("BOTTOMLEFT")
     ground:SetPoint("BOTTOMRIGHT")
     ground:SetHeight(GROUND)
-    ns.Paint(ground, 0.45, 0.30, 0.16, 1, 0.6)
+    g.ground = ground
     local edge = ns.NewTexture(board, "ARTWORK", 4)
     edge:SetPoint("BOTTOMLEFT", 0, GROUND - 2)
     edge:SetPoint("BOTTOMRIGHT", 0, GROUND - 2)
     edge:SetHeight(3)
-    ns.Paint(edge, 0.25, 0.15, 0.08, 1)
+    g.edge = edge
 
     g.player = board:CreateTexture(nil, "OVERLAY")
     g.player:SetSize(R * 2 + 12, R * 2 + 12)
-    ns.SetIcon(g.player, ICON)
     g.hint = ns.FontString(board, "GameFontNormalLarge", "CENTER")
     g.hint:SetPoint("CENTER", 0, 80)
 
@@ -228,7 +255,7 @@ ns.RegisterGame({
     id = "flappy",
     name = L["Wind Rider"],
     short = L["One-button flyer"],
-    aliases = { "flappy", "wyvern", "windreiter", "reiter", "windrider", "rider" },
+    aliases = { "flappy", "wyvern", "windreiter", "reiter", "windrider", "rider", "gryphon", "greif", "greifenflug", "gryphonflight" },
     category = "geschick",
     length = "kurz",
     icon = ICON,
@@ -237,6 +264,11 @@ ns.RegisterGame({
     width = BW, height = BH,
     desc = L["Guide your wind rider through the spires of Thousand Needles. Every wingbeat lifts you up, and gravity pulls you down in between. Each spire makes it faster and tighter."],
     controls = L["Space, Up arrow, W or click: flap · P/Esc: pause"],
+    alliance = {
+        name = L["Gryphon Flight"],
+        icon = ICON_GRYPHON,
+        desc = L["Guide your gryphon over the snowy peaks of Dun Morogh. Every wingbeat lifts you up, and gravity pulls you down in between. Each spire makes it faster and tighter."],
+    },
     controlsShort = L["Space/W/click:\nflap"],
     Create = Create,
 })

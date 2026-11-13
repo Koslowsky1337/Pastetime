@@ -297,6 +297,7 @@ ns.RegisterGame({
     keyboard = true,
     width = W, height = H,
     modes = { { id = "leicht", name = L["Easy"] }, { id = "mittel", name = L["Medium"] }, { id = "schwer", name = L["Hard"] } },
+    alliance = { icon = ICON_ALLY },
     desc = L["Take turns with the opposing faction dropping banners into the board. The first to get four in a row – horizontally, vertically or diagonally – wins. Quick wins against stronger opponents score more points."],
     controls = L["Click a column · or choose with A/D or arrows, Space drops · keys 1–7 drop directly"],
     controlsShort = L["Click a column\nA/D + Space · 1–7"],

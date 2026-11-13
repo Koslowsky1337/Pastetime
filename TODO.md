@@ -37,8 +37,9 @@ Für jedes Spiel einmal: Details in der Auswahl ansehen, kurze Runde, einmal P u
 ### Testflug
 - [ ] `/pastime testflug 40`, Kobold-Hauen oder Steinschlag starten, nochmal `/pastime testflug` – nach „Weiterspielen“ kommt der Countdown.
 
-### Allianz
-- [ ] Mit einem Allianz-Charakter kurz Vier in einer Reihe, Minenfeld, Runenpaare und einen Kartenrücken ansehen.
+### Horde und Allianz
+- [ ] Horde: Fenster mit roten Akzenten und Horde-Wappen neben „Pastime“ 📸.
+- [ ] Mit einem Allianz-Charakter: Fenster blau mit Allianz-Wappen 📸; Greifenflug, Widder-Sprint und Glocken-Echo statt Windreiter, Kodo-Sprint und Totem-Echo 📸; Windnatter auf grüner Wiese; Angeln mit Elwynn-Fischen; Vier in einer Reihe, Minenfeld, Runenpaare und Kartenrücken mit Allianz-Motiven.
 
 Zum Schluss: `/pastime debug` aus, `/reload`, dann Screenshots und Protokoll auswerten lassen.
 
@@ -51,7 +52,7 @@ Zum Schluss: `/pastime debug` aus, `/reload`, dann Screenshots und Protokoll aus
 ## 3. Offene Entscheidungen
 - [ ] Blackjack: Knopf „Kasse machen“ (Lauf freiwillig beenden und Höchststand werten)?
 - [ ] Layout-Prüfer im Release lassen (nur im Debug-Modus) oder entfernen?
-- [ ] Fraktions-Thema für Horde und Allianz (in Arbeit)
+- [x] Fraktions-Thema für Horde und Allianz (Stufe 3 umgesetzt, Prüfung im Spiel steht unter 1.)
 
 ## 4. CurseForge
 - [ ] Beta-Datei geprüft: Spielversion 1.60.1, Changelog sauber formatiert, Zip enthält nur den Ordner `Pastime` ohne `tests` und `media`
@@ -60,7 +61,7 @@ Zum Schluss: `/pastime debug` aus, `/reload`, dann Screenshots und Protokoll aus
 - [ ] Haltestellen-Koordinaten selbst nachmessen statt der Daten aus ForeverDungeonJournal und Leatrix Maps (im README genannt)
 
 ## 5. Release
-- [ ] README (= CurseForge-Beschreibung) an die Änderungen anpassen, Link zu den GitHub-Issues ergänzen
+- [ ] README (= CurseForge-Beschreibung) an die Änderungen anpassen (auch: Horde/Allianz-Varianten), Link zu den GitHub-Issues ergänzen
 - [ ] CHANGELOG: Abschnitt 1.0.0 aktualisieren
 - [ ] Version in `Pastime.toc` und `Core.lua` prüfen
 - [ ] Dateiliste der `.toc` prüfen

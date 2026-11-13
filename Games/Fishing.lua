@@ -22,6 +22,18 @@ local FISH = {
     [5] = { { L["Ancient Turtle"], "Interface\\Icons\\INV_Misc_Fish_Turtle_01", 250 } },
 }
 
+-- Allianz: Fische aus dem Wald von Elwynn (gleiche Seltenheiten und Punkte)
+local FISH_ALLY = {
+    [0] = FISH[0],
+    [1] = { { L["Elwynn Trout"], "Interface\\Icons\\INV_Misc_Fish_02", 10 },
+            { L["Brook Perch"], "Interface\\Icons\\INV_Misc_Fish_05", 12 } },
+    [2] = { { L["Goldshire Carp"], "Interface\\Icons\\INV_Misc_Fish_14", 25 },
+            { L["Mirror Lake Eel"], "Interface\\Icons\\INV_Misc_Fish_09", 25 } },
+    [3] = { { L["Silverfin Salmon"], "Interface\\Icons\\INV_Misc_Fish_16", 50 } },
+    [4] = FISH[4],
+    [5] = FISH[5],
+}
+
 local Game = {}
 Game.__index = Game
 
@@ -43,6 +55,9 @@ function Game:PlaceBobber(dy)
 end
 
 function Game:Start()
+    local ally = ns.IsAlliance()
+    self.fish = ally and FISH_ALLY or FISH
+    if ally then ns.Paint(self.shore, 0.22, 0.34, 0.14, 1, 0.65) else ns.Paint(self.shore, 0.35, 0.28, 0.14, 1, 0.65) end
     self.score, self.casts, self.caught, self.streak, self.bestStreak = 0, 0, 0, 0, 0
     self.state, self.t, self.lastMs = "ready", 0, nil
     self.log = {}
@@ -87,7 +102,7 @@ function Game:Hook()
         local r = self.biteT
         local W = self:Window()
         local q = Game.RollQuality(math.max(0, 1 - r / W))
-        local list = FISH[q]
+        local list = self.fish[q]
         local fish = list[math.random(#list)]
         self.streak = self.streak + 1
         self.bestStreak = math.max(self.bestStreak, self.streak)
@@ -190,7 +205,7 @@ local function Create(host, board)
     shore:SetPoint("BOTTOMLEFT")
     shore:SetPoint("BOTTOMRIGHT")
     shore:SetHeight(SIZE - SHORE)
-    ns.Paint(shore, 0.35, 0.28, 0.14, 1, 0.65)
+    g.shore = shore
     local pole = board:CreateTexture(nil, "ARTWORK")
     pole:SetSize(48, 48)
     pole:SetPoint("BOTTOMLEFT", 14, 8)

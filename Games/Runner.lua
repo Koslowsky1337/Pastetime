@@ -9,6 +9,19 @@ local STAND_H, DUCK_H = 44, 26
 local GRAVITY, JUMP = 2600, 860
 local ICON = "Interface\\Icons\\Ability_Mount_Kodo_01"
 local ICON_VULTURE = "Interface\\Icons\\Ability_Hunter_Pet_Vulture"
+local ICON_RAM = "Interface\\Icons\\Ability_Mount_MountainRam"
+local ICON_OWL = "Interface\\Icons\\Ability_Hunter_Pet_Owl"
+-- Horde: Kodo durchs Brachland (Kakteen, Geier) · Allianz: Widder durch Dun Morogh (Eisblöcke, Eulen)
+local LOOK = {
+    Horde = { icon = ICON, bird = ICON_VULTURE, skyLow = { 0.95, 0.7, 0.4 }, skyHigh = { 0.35, 0.55, 0.8 },
+        mesa = { 0.62, 0.42, 0.28 }, ground = { 0.62, 0.48, 0.28 }, edge = { 0.35, 0.25, 0.12 }, dots = { 0.42, 0.31, 0.16 },
+        plant = { 0.22, 0.55, 0.2 }, arms = true, rock = { 0.5, 0.48, 0.45 }, ledge = { 0.56, 0.36, 0.22 }, lip = { 0.40, 0.25, 0.15 },
+        plantText = L["Ran into a cactus!"], birdText = L["Caught by a vulture!"] },
+    Alliance = { icon = ICON_RAM, bird = ICON_OWL, skyLow = { 0.8, 0.86, 0.95 }, skyHigh = { 0.3, 0.42, 0.7 },
+        mesa = { 0.6, 0.64, 0.74 }, ground = { 0.86, 0.88, 0.93 }, edge = { 0.55, 0.6, 0.7 }, dots = { 0.7, 0.74, 0.82 },
+        plant = { 0.62, 0.82, 0.95 }, arms = false, rock = { 0.5, 0.5, 0.55 }, ledge = { 0.55, 0.6, 0.7 }, lip = { 0.4, 0.45, 0.55 },
+        plantText = L["Ran into an ice block!"], birdText = L["Caught by an owl!"] },
+}
 
 local Game = {}
 Game.__index = Game
@@ -20,7 +33,30 @@ local function rect(parent, layer, r, g, b, shade)
     return t
 end
 
+-- Aussehen je Fraktion (bei jedem Start; Spielfelder entstehen erst nach dem Login)
+function Game:ApplyLook()
+    local T = LOOK[ns.IsAlliance() and "Alliance" or "Horde"]
+    self.look = T
+    if CreateColor and self.sky.SetGradient then
+        self.sky:SetGradient("VERTICAL", CreateColor(T.skyLow[1], T.skyLow[2], T.skyLow[3], 1),
+            CreateColor(T.skyHigh[1], T.skyHigh[2], T.skyHigh[3], 1))
+    end
+    for _, m in ipairs(self.mesas) do ns.Paint(m.tex, T.mesa[1], T.mesa[2], T.mesa[3], 1, 0.8) end
+    ns.Paint(self.ground, T.ground[1], T.ground[2], T.ground[3], 1, 0.75)
+    self.edge:SetColorTexture(T.edge[1], T.edge[2], T.edge[3], 1)
+    for _, d in ipairs(self.dots) do d.tex:SetColorTexture(T.dots[1], T.dots[2], T.dots[3], 1) end
+    for _, o in ipairs(self.pool) do
+        for _, t in ipairs({ o.stem, o.armL, o.armR }) do ns.Paint(t, T.plant[1], T.plant[2], T.plant[3], 1, 0.7) end
+        ns.Paint(o.rock, T.rock[1], T.rock[2], T.rock[3], 1, 0.6)
+        ns.Paint(o.ledge, T.ledge[1], T.ledge[2], T.ledge[3], 1, 0.6)
+        ns.Paint(o.lip, T.lip[1], T.lip[2], T.lip[3], 1, 0.7)
+        ns.SetIcon(o.bird, T.bird)
+    end
+    ns.SetIcon(self.kodo, T.icon)
+end
+
 function Game:Start()
+    self:ApplyLook()
     self.h, self.vh, self.duck = 0, 0, false
     self.speed, self.dist, self.score, self.elapsed = 300, 0, 0, 0
     self.waiting, self.dead = true, false
@@ -59,7 +95,8 @@ function Game:NewObstacle()
     if o.kind == "kaktus" then
         o.stem:SetSize(o.w, o.bottom - o.top)
         o.armL:SetSize(8, 14); o.armR:SetSize(8, 18)
-        o.stem:Show(); o.armL:Show(); o.armR:Show()
+        o.stem:Show()
+        if self.look.arms then o.armL:Show(); o.armR:Show() end   -- Eisblöcke haben keine Arme
     elseif o.kind == "fels" then
         o.rock:SetSize(o.w, o.bottom - o.top)
         o.rock:Show()
@@ -166,10 +203,10 @@ function Game:Update(dt)
                 if KX + KW - 4 > o.x and KX + 4 < o.x + o.w and kBottom - 3 > o.top and kTop + 3 < o.bottom then
                     self.dead = true
                     self.kodo:SetVertexColor(1, 0.35, 0.35)
-                    local why = (o.kind == "geier" and L["Caught by a vulture!"])
+                    local why = (o.kind == "geier" and self.look.birdText)
                         or (o.kind == "fels" and L["Tripped over a rock!"])
                         or (o.kind == "ueberhang" and L["Ran into a rock overhang!"])
-                        or L["Ran into a cactus!"]
+                        or self.look.plantText
                     return self.host:Over({ score = self.score, text = why })
                 end
             end
@@ -191,6 +228,7 @@ end
 local function Create(host, board)
     local g = setmetatable({ host = host, board = board, pool = {}, dots = {}, mesas = {}, score = 0, speed = 300 }, Game)
     local sky = ns.NewTexture(board, "BACKGROUND")
+    g.sky = sky
     sky:SetPoint("TOPLEFT")
     sky:SetPoint("TOPRIGHT")
     sky:SetHeight(GY)
@@ -207,8 +245,9 @@ local function Create(host, board)
     local ground = ns.NewTexture(board, "BORDER")
     ground:SetPoint("TOPLEFT", 0, -GY)
     ground:SetPoint("BOTTOMRIGHT")
-    ns.Paint(ground, 0.62, 0.48, 0.28, 1, 0.75)
+    g.ground = ground
     local edge = ns.Box(board, "BORDER", 0.35, 0.25, 0.12)
+    g.edge = edge
     edge:SetPoint("TOPLEFT", 0, -GY)
     edge:SetPoint("TOPRIGHT", 0, -GY)
     edge:SetHeight(2)
@@ -227,13 +266,11 @@ local function Create(host, board)
         o.lip = rect(board, "ARTWORK", 0.40, 0.25, 0.15, 0.7)
         o.bird = board:CreateTexture(nil, "ARTWORK")
         o.bird:SetSize(34, 34)
-        ns.SetIcon(o.bird, ICON_VULTURE)
         o.bird:Hide()
         o.texs = { o.stem, o.armL, o.armR, o.rock, o.ledge, o.lip, o.bird }
         table.insert(g.pool, o)
     end
     g.kodo = board:CreateTexture(nil, "OVERLAY")
-    ns.SetIcon(g.kodo, ICON)
     g.hint = ns.FontString(board, "GameFontNormalLarge", "CENTER")
     g.hint:SetPoint("CENTER", 0, 40)
     board:EnableMouse(true)
@@ -247,7 +284,7 @@ ns.RegisterGame({
     id = "kodo",
     name = L["Kodo Dash"],
     short = L["Endless runner"],
-    aliases = { "kodo", "runner", "sprint", "dino", "dash", "kododash" },
+    aliases = { "kodo", "runner", "sprint", "dino", "dash", "kododash", "ram", "widder", "widdersprint", "ramdash" },
     category = "geschick",
     length = "kurz",
     icon = ICON,
@@ -258,5 +295,10 @@ ns.RegisterGame({
     desc = L["Your kodo runs across the Barrens and keeps getting faster. Jump over cacti and rocks, duck under low-flying vultures and rock overhangs. Your score is the distance in metres."],
     controls = L["Space, W, Up arrow or click: jump · S or Down arrow: duck (in the air: land faster)"],
     controlsShort = L["Space/W/click: jump\nS/Down: duck"],
+    alliance = {
+        name = L["Ram Dash"],
+        icon = ICON_RAM,
+        desc = L["Your ram races through Dun Morogh and keeps getting faster. Jump over ice blocks and rocks, duck under low-flying owls and rock overhangs. Your score is the distance in metres."],
+    },
     Create = Create,
 })

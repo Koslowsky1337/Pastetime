@@ -9,6 +9,14 @@ local TOTEMS = {
     { name = L["Earth"], icon = "Interface\\Icons\\Spell_Nature_StoneSkinTotem", x = 152, y = 270, sound = "t3", keys = { DOWN = 1, S = 1, ["3"] = 1 } },
     { name = L["Water"], icon = "Interface\\Icons\\Spell_Nature_ManaRegenTotem", x = 28, y = 150, sound = "t4", keys = { LEFT = 1, A = 1, ["4"] = 1 } },
 }
+-- Allianz: vier Glocken der Kathedrale des Lichts (gleiche Plätze, Tasten und Töne)
+local BELL = "Interface\\Icons\\INV_Misc_Bell_01"
+local BELLS = {
+    { name = L["Gold bell"], icon = BELL, tint = { 1, 0.85, 0.35 } },
+    { name = L["Silver bell"], icon = BELL, tint = { 0.8, 0.9, 1 } },
+    { name = L["Emerald bell"], icon = BELL, tint = { 0.45, 1, 0.55 } },
+    { name = L["Ruby bell"], icon = BELL, tint = { 1, 0.45, 0.45 } },
+}
 local KEYMAP = {}
 for i, t in ipairs(TOTEMS) do for k in pairs(t.keys) do KEYMAP[k] = i end end
 
@@ -25,6 +33,17 @@ end
 function Game:AllOff() for i = 1, 4 do self:Light(i, false) end end
 
 function Game:Start()
+    local ally = ns.IsAlliance()
+    self.T = ally and BELLS or TOTEMS
+    self.wrongText = ally and L["Wrong bell – it should have been %s.\nCompleted: %d rounds"]
+        or L["Wrong totem – it should have been %s.\nCompleted: %d rounds"]
+    for i, b in ipairs(self.buttons) do
+        local t = self.T[i]
+        ns.SetIcon(b.icon, t.icon)
+        local c = t.tint or { 1, 1, 1 }
+        b.icon:SetVertexColor(c[1], c[2], c[3])
+        b.label:SetText(t.name)
+    end
     self.seq, self.pos, self.score = {}, 1, 0
     self.dead = false
     self:AllOff()
@@ -51,9 +70,9 @@ function Game:Press(i)
         self.state = "over"
         self.score = #self.seq - 1
         self.title:SetText(L["|cffff6060Wrong!|r"])
-        self.sub:SetText((L["It should have been %s."]):format(TOTEMS[self.seq[self.pos]].name))
-        return self.host:Over({ score = self.score, text = (L["Wrong totem – it should have been %s.\nCompleted: %d rounds"])
-            :format(TOTEMS[self.seq[self.pos]].name, self.score) })
+        local right = self.T[self.seq[self.pos]].name
+        self.sub:SetText((L["It should have been %s."]):format(right))
+        return self.host:Over({ score = self.score, text = self.wrongText:format(right, self.score) })
     end
     self.pos = self.pos + 1
     if self.pos > #self.seq then
@@ -138,6 +157,7 @@ local function Create(host, board)
         local label = ns.FontString(b, "GameFontNormal", "CENTER")
         label:SetPoint("TOP", b, "BOTTOM", 0, -2)
         label:SetText(t.name)
+        b.label = label
         b:SetScript("OnClick", function()
             if host:IsRunning() then ns.Safe("simon", g.Press, g, i) end
         end)
@@ -155,7 +175,7 @@ ns.RegisterGame({
     id = "simon",
     name = L["Totem Echo"],
     short = L["Sequence memory"],
-    aliases = { "simon", "totem", "totems", "echo", "totemecho" },
+    aliases = { "simon", "totem", "totems", "echo", "totemecho", "glocken", "bells", "glockenecho", "bellecho" },
     category = "knobeln",
     length = "kurz",
     icon = "Interface\\Icons\\Spell_Nature_StoneSkinTotem",
@@ -165,5 +185,12 @@ ns.RegisterGame({
     controls = L["Click the totems · or arrow keys/WASD (up Air, right Fire, down Earth, left Water) · 1–4"],
     controlsShort = L["Click or arrows/WASD\nup Air · right Fire\ndown Earth · left Water"],
     scoreLabel = L["Rounds"],
+    alliance = {
+        name = L["Bell Echo"],
+        icon = BELL,
+        desc = L["The bells of the Cathedral of Light ring in a sequence – repeat it in the same order. Every round adds one more bell, and the pace picks up."],
+        controls = L["Click the bells · or arrow keys/WASD (up gold, right silver, down emerald, left ruby) · 1–4"],
+        controlsShort = L["Click or arrows/WASD\nup gold · right silver\ndown emerald · left ruby"],
+    },
     Create = Create,
 })

@@ -38,11 +38,28 @@ function ns.SetIcon(tex, path, crop)
     if crop ~= false then tex:SetTexCoord(0.08, 0.92, 0.08, 0.92) end
 end
 
+-- Fensterfarben je Fraktion: Horde rot, Allianz blau (ns.ApplyFaction wählt beim Login)
+ns.THEMES = {
+    Horde = { border = { 1, 0.55, 0.45 }, bg = { 1, 0.82, 0.8 }, inset = { 0.72, 0.42, 0.36 },
+        crest = "Interface\\Icons\\Achievement_PVP_H_H" },
+    Alliance = { border = { 0.55, 0.72, 1 }, bg = { 0.8, 0.88, 1 }, inset = { 0.42, 0.55, 0.8 },
+        crest = "Interface\\Icons\\Achievement_PVP_A_A" },
+}
+ns.THEME = ns.THEMES.Horde
+
+-- Dialograhmen (Hauptfenster, Overlays, Hinweise) in der Fraktionsfarbe tönen
+function ns.TintDialog(f)
+    local t = ns.THEME
+    f:SetBackdropBorderColor(t.border[1], t.border[2], t.border[3], 1)
+    f:SetBackdropColor(t.bg[1], t.bg[2], t.bg[3], 1)
+end
+
 function ns.CreateInset(parent, alpha)
     local f = CreateFrame("Frame", nil, parent, "BackdropTemplate")
     f:SetBackdrop(TOOLTIP_BACKDROP)
     f:SetBackdropColor(0, 0, 0, alpha or 0.6)
-    f:SetBackdropBorderColor(0.6, 0.6, 0.6, 1)
+    local c = ns.THEME.inset
+    f:SetBackdropBorderColor(c[1], c[2], c[3], 1)
     return f
 end
 
@@ -51,7 +68,8 @@ function ns.CreateParchment(parent)
     local f = CreateFrame("Frame", nil, parent, "BackdropTemplate")
     f:SetBackdrop(TOOLTIP_BACKDROP)
     f:SetBackdropColor(0.1, 0.08, 0.05, 1)
-    f:SetBackdropBorderColor(0.6, 0.6, 0.6, 1)
+    local c = ns.THEME.inset
+    f:SetBackdropBorderColor(c[1], c[2], c[3], 1)
     local bg = f:CreateTexture(nil, "BACKGROUND", nil, 1)
     bg:SetPoint("TOPLEFT", 4, -4)
     bg:SetPoint("BOTTOMRIGHT", -4, 4)
@@ -305,6 +323,7 @@ function ns.ShowCopy(title, text)
     if not f then
         f = CreateFrame("Frame", "PastimeCopyFrame", UIParent, "BackdropTemplate")
         f:SetBackdrop(BACKDROP_DIALOG_32_32 or TOOLTIP_BACKDROP)
+        ns.TintDialog(f)
         f:SetSize(560, 320)
         f:SetPoint("CENTER", 0, 60)
         f:SetFrameStrata("DIALOG")

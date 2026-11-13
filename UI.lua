@@ -247,6 +247,7 @@ local function CreateOverlay(parent)
     o.shade:SetColorTexture(0, 0, 0, 0.7)
     local box = CreateFrame("Frame", nil, o, "BackdropTemplate")
     box:SetBackdrop(BACKDROP_DIALOG_32_32 or ns.TOOLTIP_BACKDROP)
+    ns.TintDialog(box)
     box:SetSize(340, 170)
     box:SetPoint("CENTER")
     o.box = box
@@ -1021,6 +1022,7 @@ function ns.CreateMainFrame()
     if ns.frame then return ns.frame end
     local f = ns.AutoWrap(CreateFrame("Frame", "PastimeFrame", UIParent, "BackdropTemplate"), "fenster")
     f:SetBackdrop(BACKDROP_DIALOG_32_32 or ns.TOOLTIP_BACKDROP)
+    ns.TintDialog(f)
     f:SetSize(W, H)
     f:SetFrameStrata("HIGH")
     f:SetToplevel(true)
@@ -1042,9 +1044,16 @@ function ns.CreateMainFrame()
     header:SetTexture(ns.TEX.header)
     header:SetSize(300, 64)
     header:SetPoint("TOP", 0, 12)
+    local tb = ns.THEME.border
+    header:SetVertexColor(tb[1], tb[2], tb[3])
     local title = ns.FontString(f, "GameFontNormal", "CENTER")
     title:SetPoint("TOP", header, "TOP", 0, -14)
     title:SetText("Pastime")
+    -- Wappen der Fraktion links neben dem Titel
+    local crest = f:CreateTexture(nil, "OVERLAY")
+    crest:SetSize(18, 18)
+    crest:SetPoint("RIGHT", title, "LEFT", -6, 0)
+    ns.SetIcon(crest, ns.THEME.crest)
     ns.CreateCloseButton(f):SetPoint("TOPRIGHT", -4, -4)
 
     ns.frame = f

@@ -90,6 +90,54 @@ g = ns.run.game
 key("RIGHT"); tick(3)
 check(over() and #PastimeDB.scores.snake == 1, "Windnatter: 0 Punkte kommen nicht in die Bestenliste")
 
+-- Windreiter -------------------------------------------------------------------
+g = start("flappy")
+check(g.waiting and g.hint:IsShown(), "Windreiter wartet mit Hinweis")
+check(key("UP") and not g.waiting and g.vy < 0, "Windreiter startet mit Hoch/Leertaste/W")
+local sp
+for _, s in ipairs(g.pool) do if s.active then sp = s end end
+check(sp ~= nil and sp.x > 420, "erste Felsnadel kommt von rechts")
+-- Nadel durchfliegen: Lücke um den Reiter, Nadel knapp hinter ihm
+g.y, g.vy = 200, 0
+sp.top, sp.bottom, sp.x = 150, 260, 110 - 12 - 54 - 1
+g:Update(0.01)
+check(g.score == 1 and sp.passed, "Windreiter: Nadel durchflogen = 1 Punkt")
+-- Countdown nach der Pause
+key("P")
+check(ns.run.state == "paused", "Windreiter pausiert mit P")
+ns.Resume()
+check(ns.run.countdown == 3 and ns.gameView.countdown:IsShown() and ns.gameView.countdown.text == "3", "Countdown 3 nach Weiter")
+check(not ns.host:IsRunning(), "Countdown: Maus fliegt nicht")
+local y0, vy0 = g.y, g.vy
+key("SPACE")
+tick(1.1)
+check(g.y == y0 and g.vy == vy0 and ns.gameView.countdown.text == "2", ("Countdown: Spiel steht, Taste geschluckt (y %s/%s vy %s/%s Text %s)"):format(g.y, y0, g.vy, vy0, ns.gameView.countdown.text))
+key("P")
+check(ns.run.state == "paused" and not ns.gameView.countdown:IsShown(), "Pause während des Countdowns")
+ns.Resume()
+tick(3.1)
+check(ns.run.countdown == nil and not ns.gameView.countdown:IsShown(), "Countdown abgelaufen")
+tick(0.2)
+check(g.y ~= y0 or g.dead, "Windreiter fliegt nach dem Countdown weiter")
+-- Absturz: Wertung
+for _, s in ipairs(g.pool) do g:HideSpire(s) end
+g.vy = 0
+tick(3)
+check(over() and best("flappy") == 1, "Windreiter: Absturz beendet die Partie, 1 Punkt gewertet")
+check(#g:Info() == 2, "Windreiter: Seitenleiste ohne Lückenhöhe")
+-- Leertaste direkt nach dem Absturz startet nicht neu
+ns.run.overAt = NOW
+check(key("SPACE") and over(), "Leertaste-Sperre direkt nach Spielende")
+NOW = NOW + 0.8
+key("SPACE")
+check(ns.run.state == "running" and ns.run.game.waiting, "nach 0,75 s startet die Leertaste neu")
+check(ns.run.game.hint.text:find("W") and #ns.run.game.hint.text > 0, "Windreiter: Starthinweis gesetzt")
+-- Spiele ohne resumeDelay: kein Countdown
+g = start("snake")
+key("RIGHT"); key("P"); ns.Resume()
+check(ns.run.state == "running" and ns.run.countdown == nil, "Windnatter: kein Countdown")
+ns.ShowLauncher()
+
 -- Kobold-Hauen ----------------------------------------------------------------
 g = start("kobold")
 tick(1.2)

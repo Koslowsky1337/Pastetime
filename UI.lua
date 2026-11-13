@@ -15,7 +15,17 @@ ns.selected = nil     -- in der Auswahl markiertes Spiel
 local host = {}
 ns.host = host
 
-function host:IsRunning() return ns.run ~= nil and ns.run.state == "running" end
+function host:IsRunning() return ns.run ~= nil and ns.run.state == "running" and not ns.run.countdown end
+
+-- Countdown nach „Weiter“ (def.resumeDelay): Spiel steht, Eingaben werden geschluckt
+function ns.SetCountdown(sec)
+    if ns.run then ns.run.countdown = sec end
+    local fs = ns.gameView and ns.gameView.countdown
+    if fs then
+        fs:SetText(sec and tostring(math.ceil(sec)) or "")
+        fs:SetShown(sec ~= nil)
+    end
+end
 function host:Sound(kind) ns.PlaySound(kind) end
 function host:Refresh() if ns.UpdateSidePanel then ns.UpdateSidePanel() end end
 function host:Over(res) ns.GameOver(res) end
@@ -82,9 +92,13 @@ function ns.HandleKey(key, down)
         if run.state == "running" then ns.Pause(); used = true
         elseif run.state == "over" then ns.ShowLauncher(); used = true end
     elseif run.state == "over" and key == "SPACE" then
-        ns.Restart(); used = true
+        -- kurze Sperre: wer beim Absturz noch hämmert, soll das Ergebnis erst sehen
+        if GetTime() - (run.overAt or 0) >= 0.75 then ns.Restart() end
+        used = true
     elseif run.state == "running" and key == "P" and not run.def.textInput then
         ns.Pause(); used = true
+    elseif run.countdown then
+        -- Countdown läuft: nicht ans Spiel geben (wird unten geschluckt, Chat & Co. kommen durch)
     elseif run.state == "running" and run.game.Key and run.game:Key(key, true) then
         used = true
     end
@@ -135,6 +149,7 @@ function ns.StartGame(def, mode)
     local trip = ns.trip
     ns.run = { def = def, mode = mode, game = def._game, state = "running", t = 0,
         tripId = trip.active and trip.id or nil }
+    ns.SetCountdown(nil)
     def._game:Start(mode)          -- erst starten, dann anzeigen (die Seitenleiste fragt sofort ab)
     ns.frame:Show()
     ns.ShowView("game")
@@ -156,6 +171,7 @@ function ns.Pause(reason)
     local run = ns.run
     if not run or run.state ~= "running" then return end
     run.state = "paused"
+    ns.SetCountdown(nil)
     if run.game.OnPause then run.game:OnPause() end
     local text = (reason and reason ~= "") and (reason .. "\n\n") or ""
     ns.ShowOverlay("pause", L["Paused"], text .. L["|cffbbbbbbYour keys are free – you can move.\nClick or press “Resume” to continue. “Quit” does not score the round.|r"])
@@ -173,6 +189,7 @@ function ns.Resume()
     run.state = "running"
     run.landed = nil
     ns.HideOverlay()
+    ns.SetCountdown(run.def.resumeDelay)
     if run.game.OnResume then run.game:OnResume() end
     if ns.trip.active then ns.trip.played = true end
     ns.UpdateKeyboard()
@@ -184,6 +201,7 @@ function ns.GameOver(res)
     if not run or run.state == "over" then return end
     res = res or {}
     run.state = "over"
+    run.overAt = GetTime()
     local def = run.def
     local rank, personal, routeRank, route
     if res.score and res.submit ~= false then
@@ -715,6 +733,15 @@ local function CreateGameView(parent)
 
     ns.overlay = CreateOverlay(area)
 
+    -- großer Countdown über dem Spielfeld (unter den Overlays, klickdurchlässig)
+    local cd = CreateFrame("Frame", nil, area)
+    cd:SetAllPoints()
+    cd:SetFrameLevel(area:GetFrameLevel() + 20)
+    v.countdown = ns.FontString(cd, "GameFontNormalHuge", "CENTER")
+    v.countdown:SetPoint("CENTER")
+    if v.countdown.SetTextScale then v.countdown:SetTextScale(2.5) end
+    v.countdown:Hide()
+
     -- Tastatur (bewusst ohne AutoWrap, damit die Weitergabe immer gesetzt wird)
     v:SetScript("OnKeyDown", function(self, key)
         local used = ns.Safe("taste", ns.HandleKey, key, true) and true or false
@@ -728,7 +755,10 @@ local function CreateGameView(parent)
     local acc = 0
     v:SetScript("OnUpdate", function(_, elapsed)
         local run = ns.run
-        if run and run.state == "running" then
+        if run and run.state == "running" and run.countdown then
+            local left = run.countdown - elapsed
+            ns.SetCountdown(left > 0 and left or nil)
+        elseif run and run.state == "running" then
             local dt = math.min(elapsed, 0.1)
             run.t = run.t + dt
             ns.AddPlayTime(run.def.id, dt)

@@ -71,7 +71,7 @@ function Game:Start()
     self.lastX = nil
     self.player:SetVertexColor(1, 1, 1)
     self:PlacePlayer()
-    self.hint:SetText(L["Space, W or click to take off"])
+    self.hint:SetText(L["Space, W, Up arrow or click to take off"])
     self.hint:Show()
 end
 
@@ -163,7 +163,6 @@ function Game:Info()
     return {
         { L["Spires"], tostring(self.score or 0) },
         { L["Speed"], tostring(math.floor((self:Speed() - 150) / 15) + 1) },
-        { L["Gap height"], tostring(math.floor(self:GapSize())) },
     }
 end
 
@@ -234,6 +233,7 @@ ns.RegisterGame({
     length = "kurz",
     icon = ICON,
     keyboard = true,
+    resumeDelay = 3,               -- nach einer Pause erst 3-2-1, sonst stürzt man sofort ab
     width = BW, height = BH,
     desc = L["Guide your wind rider through the spires of Thousand Needles. Every wingbeat lifts you up, and gravity pulls you down in between. Each spire makes it faster and tighter."],
     controls = L["Space, Up arrow, W or click: flap · P/Esc: pause"],

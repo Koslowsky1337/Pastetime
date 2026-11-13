@@ -174,7 +174,7 @@ end
 function Game:Info()
     return {
         { L["Balls"], tostring(self.lives or 3) },
-        { "Level", tostring(self.level or 1) },
+        { L["Level"], tostring(self.level or 1) },
         { L["Bricks left"], tostring(self.left or 0) },
     }
 end
@@ -215,6 +215,7 @@ ns.RegisterGame({
     length = "lang",
     icon = "Interface\\Icons\\INV_Crate_01",
     keyboard = true,
+    resumeDelay = 3,               -- nach einer Pause erst 3-2-1
     width = W, height = H,
     desc = L["Keep the ball in play with your paddle and smash the wall. Legendary and epic bricks need two hits. Every level gets faster – you have three balls."],
     controls = L["Mouse over the board, A/D or arrow keys: paddle · Space or click: launch the ball"],

@@ -230,10 +230,28 @@ function ns.Box(parent, layer, r, g, b, a, sub)
 end
 
 -- Aufsteigende Texte („+10“) – das Spiel ruft :Update(dt) auf
+-- Fraktion des Spielers (neutral zählt als Horde): für Flaggen, Wappen, Kartenrücken
+function ns.IsAlliance()
+    local ok, f = pcall(UnitFactionGroup, "player")
+    return ok and f == "Alliance"
+end
+
+-- Text über allem, was auf dem Spielfeld liegt (Kacheln, Knöpfe): Texte direkt auf
+-- dem Spielfeld lägen unter dessen Kind-Frames. Bleibt unter Countdown und Overlays.
+function ns.BoardText(board, font, justify)
+    if not board.textLayer then
+        local f = CreateFrame("Frame", nil, board)
+        f:SetAllPoints()
+        f:SetFrameLevel(board:GetFrameLevel() + 10)
+        board.textLayer = f
+    end
+    return ns.FontString(board.textLayer, font, justify)
+end
+
 function ns.CreateFloaters(parent, n)
     local f = { pool = {} }
     for i = 1, n or 6 do
-        local fs = parent:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
+        local fs = ns.BoardText(parent, "GameFontNormalLarge", "CENTER")
         fs:Hide()
         f.pool[i] = { fs = fs, t = 0 }
     end

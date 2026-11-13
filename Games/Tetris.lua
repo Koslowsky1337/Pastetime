@@ -18,6 +18,9 @@ local SHAPES = {
 local ORDER = { "I", "O", "T", "S", "Z", "J", "L" }
 local LINE_POINTS = { 100, 300, 500, 800 }
 local KICKS = { { 0, 0 }, { -1, 0 }, { 1, 0 }, { -2, 0 }, { 2, 0 }, { 0, -1 } }
+-- Haltezeit: ein aufliegender Stein rastet erst nach kurzer Zeit ein; Schieben oder
+-- Drehen setzt sie zurück (begrenzt, damit man nicht ewig weiterschieben kann)
+local LOCK_DELAY, LOCK_RESETS = 0.4, 15
 
 local KEYS = {
     LEFT = "left", A = "left", RIGHT = "right", D = "right", DOWN = "down", S = "down",
@@ -61,7 +64,7 @@ function Game:Spawn()
     self.next = self:NextFromBag()
     local s = SHAPES[kind]
     self.cur = { kind = kind, n = s.n, cells = s.cells, x = math.floor((COLS - s.n) / 2), y = 0 }
-    self.fall = 0
+    self.fall, self.lockT, self.resets = 0, nil, 0
     if not self:Fits(self.cur.cells, self.cur.x, self.cur.y) then
         self.dead = true
         self:Render()
@@ -152,17 +155,21 @@ end
 
 function Game:Do(act)
     if self.dead or self.clearing or not self.cur then return end
-    if act == "left" then self:Move(-1, 0)
-    elseif act == "right" then self:Move(1, 0)
+    local shifted
+    if act == "left" then shifted = self:Move(-1, 0)
+    elseif act == "right" then shifted = self:Move(1, 0)
     elseif act == "down" then
         if self:Move(0, 1) then self.score = self.score + 1; self.fall = 0 else self:Lock() end
-    elseif act == "cw" then self:Rotate(1)
-    elseif act == "ccw" then self:Rotate(-1)
+    elseif act == "cw" then shifted = self:Rotate(1)
+    elseif act == "ccw" then shifted = self:Rotate(-1)
     elseif act == "drop" then
         local n = 0
         while self:Move(0, 1) do n = n + 1 end
         self.score = self.score + 2 * n
         self:Lock()
+    end
+    if shifted and self.lockT and self.resets < LOCK_RESETS then
+        self.lockT, self.resets = LOCK_DELAY, self.resets + 1
     end
     self:Render()
 end
@@ -202,10 +209,21 @@ function Game:Update(dt)
         end
     end
     if not self.cur or self.dead or self.clearing then return end
+    local c = self.cur
+    if not self:Fits(c.cells, c.x, c.y + 1) then
+        -- liegt auf: Haltezeit läuft, dann einrasten
+        self.lockT = (self.lockT or LOCK_DELAY) - dt
+        if self.lockT <= 0 then
+            self:Lock()
+            self:Render()
+        end
+        return
+    end
+    self.lockT = nil
     self.fall = self.fall + dt
     if self.fall >= self:Interval() then
         self.fall = 0
-        if not self:Move(0, 1) then self:Lock() end
+        self:Move(0, 1)
         self:Render()
     end
 end
@@ -309,6 +327,7 @@ ns.RegisterGame({
     length = "lang",
     icon = "Interface\\Icons\\INV_Stone_04",
     keyboard = true,
+    resumeDelay = 3,               -- nach einer Pause erst 3-2-1
     width = COLS * SIZE, height = ROWS * SIZE,
     previewLabel = L["Next block"],
     desc = L["Blocks in item-quality colours come tumbling down. Fit them together into full lines – four lines at once score the most points. Every ten lines the pace picks up."],

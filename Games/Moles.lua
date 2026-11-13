@@ -183,6 +183,7 @@ ns.RegisterGame({
     length = "kurz",
     icon = ICON_KOBOLD,
     keyboard = true,
+    resumeDelay = 3,               -- nach einer Pause erst 3-2-1
     width = SIZE, height = SIZE,
     desc = L["Kobolds pop their heads out of the mine shafts – bonk them before they vanish! Golden foremen are worth 30 points, dynamite costs you 20. A round lasts 60 seconds and keeps getting more hectic."],
     controls = L["Click a shaft · or keys 1–9 laid out like the number pad (7 8 9 on top)"],

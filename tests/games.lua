@@ -574,6 +574,75 @@ g.CursorXY = function() return 6 + 5 * 60 + 10, 92 + 50 end
 g:DragStop()
 check(#g.tab[3] == 2, "Maus: ungültiges Ziel – Karte bleibt liegen")
 
+-- Prüfung der übrigen Spiele ------------------------------------------------------
+-- G1: Texte über den Kacheln/Knöpfen (eigene Ebene über dem Spielfeld)
+g = start("kobold")
+local layer = ns.gamesById.kobold._board.textLayer
+check(layer and layer.level > ns.gamesById.kobold._board.level and g.floaters.pool[1].fs.__parent == layer, "Kobold: Punkte über den Schächten")
+g = start("edelsteine")
+check(g.msg.__parent == ns.gamesById.edelsteine._board.textLayer, "Edelsteine: Meldungen über den Steinen")
+g = start("2048")
+check(g.banner.__parent == ns.gamesById["2048"]._board.textLayer, "2048: Banner über den Kacheln")
+-- G3: Pause-Hinweis zentral in der Seitenleiste
+g = start("snake"); ns.UpdateSidePanel()
+local ctl = ns.gameView.side.controls.text
+check(ctl:find(ns.L["P/Esc: pause"], 1, true) and select(2, ctl:gsub("P/Esc", "")) == 1, "Seitenleiste: genau ein Pause-Hinweis (" .. ctl .. ")")
+g = start("wortraten"); ns.UpdateSidePanel()
+check(ns.gameView.side.controls.text:find(ns.L["Esc: pause"], 1, true) and not ns.gameView.side.controls.text:find("P/Esc", 1, true), "Wortraten: nur Esc pausiert")
+-- G5: /pastime goblin ist nicht mehr doppelt belegt
+local dup = 0
+for _, d in ipairs(ns.games) do for _, a in ipairs(d.aliases or {}) do if a == "goblin" then dup = dup + 1 end end end
+check(dup == 0, "Befehl „goblin“ nicht mehr doppelt")
+-- G2: Countdown bei allen Echtzeitspielen
+for _, id in ipairs({ "kobold", "tetris", "breakout", "murlocs" }) do
+    check(ns.gamesById[id].resumeDelay == 3, id .. ": Countdown nach Pause")
+end
+-- G4: Fraktion – Allianz spielt Allianz
+UnitFactionGroup = function() return "Alliance", "Alliance" end
+g = start("viergewinnt")
+check(g.ally and g.myIcon:find("PVP_02") and g.status.text == ns.L["You play the Alliance – drop your piece!"], "Vier in einer Reihe: Allianz spielt Allianz")
+UnitFactionGroup = nil
+g = start("viergewinnt")
+check(not g.ally and g.myIcon:find("PVP_01"), "Vier in einer Reihe: sonst Horde")
+-- Steinschlag: Haltezeit, Schieben setzt sie zurück
+g = start("tetris")
+while g:Move(0, 1) do end
+g:Update(0.25)
+check(g.cur and g.pieces == 0 and g.lockT and g.lockT < 0.2, "Steinschlag: aufliegender Stein rastet nicht sofort ein")
+g:Do("left")
+g:Update(0.25)
+check(g.pieces == 0, "Steinschlag: Schieben verlängert die Haltezeit")
+g:Update(0.5)
+check(g.pieces == 1, "Steinschlag: rastet danach ein")
+-- Angeln: „Sieg!“ erst ab 300 Punkten
+g = start("angeln")
+g.casts, g.state, g.t, g.score = 10, "result", 0, 120
+tick(0.1)
+check(over() and ns.overlay.title.text ~= ns.L["Victory!"], "Angeln: 120 Punkte sind kein Sieg")
+-- Mauerbrecher: Stufe übersetzt
+g = start("breakout")
+check(g:Info()[2][1] == ns.L["Level"], "Mauerbrecher: Seitenleiste „" .. g:Info()[2][1] .. "“")
+-- Totem-Echo: Rahmen (22 px um jedes Totem) bleiben im Feld
+g = start("simon")
+local inside = true
+for _, b in ipairs(g.buttons) do
+    local p = b.points.TOPLEFT
+    local x, y = p[3], -p[4]
+    if x - 22 < 0 or y - 22 < 0 or x + 116 + 22 > 420 or y + 116 + 22 > 420 then inside = false end
+end
+check(inside, "Totem-Echo: Totems samt Rahmen im Feld")
+-- Runenpaare: dritter Klick deckt das falsche Paar sofort zu
+g = start("memory")
+local a1, b1, c1
+for i, c in ipairs(g.cards) do
+    if not a1 then a1 = i elseif not b1 and c.icon ~= g.cards[a1].icon then b1 = i
+    elseif b1 and not c1 and i ~= a1 and i ~= b1 then c1 = i end
+end
+g:Flip(a1); g:Flip(b1)
+check(g.lockT ~= nil, "Runenpaare: falsches Paar liegt offen")
+g:Flip(c1)
+check(g.lockT == nil and not g.cards[a1].up and not g.cards[b1].up and g.cards[c1].up, "Runenpaare: Klick deckt sofort zu und dreht die neue Karte")
+
 -- Zufallstest: alle Spiele mit wilden Tasten ---------------------------------------
 local KEYS = { "UP", "DOWN", "LEFT", "RIGHT", "W", "A", "S", "D", "SPACE", "ENTER", "1", "2", "3", "4", "5", "6", "7",
     "8", "9", "Q", "E", "X", "Z", "H", "V", "BACKSPACE", "P", "ESCAPE", "B", "M" }

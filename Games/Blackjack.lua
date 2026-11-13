@@ -284,7 +284,7 @@ ns.RegisterGame({
     id = "blackjack",
     name = L["Goblin Blackjack"],
     short = L["Twenty-one"],
-    aliases = { "blackjack", "17und4", "goblin", "21" },
+    aliases = { "blackjack", "17und4", "21" },
     category = "karten",
     length = "kurz",
     icon = "Interface\\Icons\\INV_Misc_Coin_01",

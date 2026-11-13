@@ -132,7 +132,7 @@ function Game:Update(dt)
         if self.t <= 0 then
             if self.casts >= CASTS then
                 self.state = "over"
-                self.host:Over({ score = self.score, won = self.score > 0,
+                self.host:Over({ score = self.score, won = self.score >= 300,   -- „Sieg!“ erst für eine gute Runde
                     text = (L["%d fish caught · best streak %d"]):format(self.caught, self.bestStreak) })
             else
                 self.state = "ready"

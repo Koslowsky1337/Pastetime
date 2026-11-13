@@ -241,7 +241,7 @@ local function Create(host, board)
             g.tiles[y][x] = t
         end
     end
-    g.banner = ns.FontString(board, "GameFontNormalLarge", "CENTER")
+    g.banner = ns.BoardText(board, "GameFontNormalLarge", "CENTER")
     g.banner:SetPoint("TOP", 0, -6)
     g.banner:Hide()
     return g
@@ -259,6 +259,6 @@ ns.RegisterGame({
     width = SIZE, height = SIZE,
     desc = L["Slide all tiles in one direction – equal tiles merge and rise one quality level: Poor, Common, Uncommon, Rare, Epic, Legendary … Can you reach the titanic 2048?"],
     controls = L["Arrow keys or WASD slide all tiles · P/Esc: pause"],
-    controlsShort = L["Arrows/WASD: slide\nP/Esc: pause"],
+    controlsShort = L["Arrows/WASD: slide"],
     Create = Create,
 })

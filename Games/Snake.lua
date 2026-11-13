@@ -218,6 +218,6 @@ ns.RegisterGame({
     width = COLS * SIZE, height = ROWS * SIZE,
     desc = L["The classic: steer the wind serpent across the Barrens, eat murloc eggs and grow longer and longer. Now and then a pearl glitters – grab it before it disappears. Don't hit the rocks or your own tail!"],
     controls = L["Arrow keys or WASD to steer · P or Esc pauses"],
-    controlsShort = L["Arrows/WASD: steer\nP/Esc: pause"],
+    controlsShort = L["Arrows/WASD: steer"],
     Create = Create,
 })

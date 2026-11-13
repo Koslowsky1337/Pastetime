@@ -257,6 +257,6 @@ ns.RegisterGame({
     width = W, height = H,
     desc = L["Your kodo runs across the Barrens and keeps getting faster. Jump over cacti and rocks, duck under low-flying vultures and rock overhangs. Your score is the distance in metres."],
     controls = L["Space, W, Up arrow or click: jump · S or Down arrow: duck (in the air: land faster)"],
-    controlsShort = L["Space/W/click: jump\nS/Down: duck\nP/Esc: pause"],
+    controlsShort = L["Space/W/click: jump\nS/Down: duck"],
     Create = Create,
 })

@@ -11,6 +11,7 @@ for _, m in ipairs(MODES) do MODE_BY_ID[m.id] = m end
 
 local ICON_MINE = "Interface\\Icons\\INV_Misc_Bomb_04"
 local TEX_FLAG = "Interface\\WorldStateFrame\\HordeFlag"
+local TEX_FLAG_ALLY = "Interface\\WorldStateFrame\\AllianceFlag"
 local TEX_WRONG = "Interface\\TargetingFrame\\UI-RaidTargetingIcon_7"
 local NUM_COLORS = {
     { 0.45, 0.65, 1.00 }, { 0.35, 0.90, 0.35 }, { 1.00, 0.35, 0.35 }, { 0.75, 0.45, 1.00 },
@@ -135,7 +136,7 @@ function Game:Draw(i)
     else
         ns.Paint(b.bg, STONE[1], STONE[2], STONE[3], 1, 0.62)
         if self.flag[i] then
-            b.icon:SetTexture(TEX_FLAG)
+            b.icon:SetTexture(ns.IsAlliance() and TEX_FLAG_ALLY or TEX_FLAG)
             b.icon:SetTexCoord(0, 1, 0, 1)
             b.icon:Show()
             if self.dead and not self.mine[i] then b.mark:Show() end
@@ -247,7 +248,7 @@ ns.RegisterGame({
     id = "minen",
     name = L["Goblin Minefield"],
     short = L["Mine finder"],
-    aliases = { "minen", "minesweeper", "minenfeld", "goblin", "minefield", "mines" },
+    aliases = { "minen", "minesweeper", "minenfeld", "minefield", "mines" },
     category = "knobeln",
     length = "kurz",
     icon = ICON_MINE,

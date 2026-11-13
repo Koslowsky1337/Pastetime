@@ -4,10 +4,10 @@ local L = ns.L
 
 local SIZE, TS = 420, 116
 local TOTEMS = {
-    { name = L["Air"], icon = "Interface\\Icons\\Spell_Nature_Windfury", x = 152, y = 14, sound = "t1", keys = { UP = 1, W = 1, ["1"] = 1 } },
-    { name = L["Fire"], icon = "Interface\\Icons\\Spell_Fire_SearingTotem", x = 290, y = 150, sound = "t2", keys = { RIGHT = 1, D = 1, ["2"] = 1 } },
-    { name = L["Earth"], icon = "Interface\\Icons\\Spell_Nature_StoneSkinTotem", x = 152, y = 286, sound = "t3", keys = { DOWN = 1, S = 1, ["3"] = 1 } },
-    { name = L["Water"], icon = "Interface\\Icons\\Spell_Nature_ManaRegenTotem", x = 14, y = 150, sound = "t4", keys = { LEFT = 1, A = 1, ["4"] = 1 } },
+    { name = L["Air"], icon = "Interface\\Icons\\Spell_Nature_Windfury", x = 152, y = 26, sound = "t1", keys = { UP = 1, W = 1, ["1"] = 1 } },
+    { name = L["Fire"], icon = "Interface\\Icons\\Spell_Fire_SearingTotem", x = 276, y = 150, sound = "t2", keys = { RIGHT = 1, D = 1, ["2"] = 1 } },
+    { name = L["Earth"], icon = "Interface\\Icons\\Spell_Nature_StoneSkinTotem", x = 152, y = 270, sound = "t3", keys = { DOWN = 1, S = 1, ["3"] = 1 } },
+    { name = L["Water"], icon = "Interface\\Icons\\Spell_Nature_ManaRegenTotem", x = 28, y = 150, sound = "t4", keys = { LEFT = 1, A = 1, ["4"] = 1 } },
 }
 local KEYMAP = {}
 for i, t in ipairs(TOTEMS) do for k in pairs(t.keys) do KEYMAP[k] = i end end

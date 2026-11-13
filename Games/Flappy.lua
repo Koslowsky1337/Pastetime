@@ -237,6 +237,6 @@ ns.RegisterGame({
     width = BW, height = BH,
     desc = L["Guide your wind rider through the spires of Thousand Needles. Every wingbeat lifts you up, and gravity pulls you down in between. Each spire makes it faster and tighter."],
     controls = L["Space, Up arrow, W or click: flap · P/Esc: pause"],
-    controlsShort = L["Space/W/click:\nflap\nP/Esc: pause"],
+    controlsShort = L["Space/W/click:\nflap"],
     Create = Create,
 })

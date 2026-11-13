@@ -40,7 +40,7 @@ function Game:BuildSet(m)
         b.back = ns.NewTexture(b, "BACKGROUND")
         b.back:SetAllPoints()
         b.emblem = b:CreateTexture(nil, "BORDER")
-        b.emblem:SetTexture("Interface\\TargetingFrame\\UI-PVP-Horde")
+        b.emblem:SetTexture(ns.IsAlliance() and "Interface\\TargetingFrame\\UI-PVP-Alliance" or "Interface\\TargetingFrame\\UI-PVP-Horde")
         b.emblem:SetSize(m.w * 0.7, m.w * 0.7)
         b.emblem:SetPoint("CENTER")
         b.emblem:SetAlpha(0.35)
@@ -97,7 +97,9 @@ function Game:Start(mode)
 end
 
 function Game:Flip(i)
-    if self.won or self.lockT then return end
+    if self.won then return end
+    -- falsches Paar liegt noch offen: sofort zudecken statt warten
+    if self.lockT then self:CoverOpen() end
     local c = self.cards[i]
     if not c or c.up or c.done then return end
     self.started = true
@@ -127,15 +129,17 @@ function Game:Flip(i)
     self.host:Refresh()
 end
 
+function Game:CoverOpen()
+    self.lockT = nil
+    for _, i in ipairs(self.open) do self.cards[i].up = false; self:Draw(i) end
+    self.open = {}
+end
+
 function Game:Update(dt)
     if self.started and not self.won then self.time = self.time + dt end
     if self.lockT then
         self.lockT = self.lockT - dt
-        if self.lockT <= 0 then
-            self.lockT = nil
-            for _, i in ipairs(self.open) do self.cards[i].up = false; self:Draw(i) end
-            self.open = {}
-        end
+        if self.lockT <= 0 then self:CoverOpen() end
     end
 end
 

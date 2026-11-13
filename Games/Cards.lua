@@ -90,7 +90,7 @@ function Cards.Create(parent, w, h)
     b.emblem = b:CreateTexture(nil, "ARTWORK")
     b.emblem:SetSize(w * 0.55, w * 0.55)
     b.emblem:SetPoint("CENTER")
-    ns.SetIcon(b.emblem, "Interface\\Icons\\INV_BannerPVP_01")
+    ns.SetIcon(b.emblem, ns.IsAlliance() and "Interface\\Icons\\INV_BannerPVP_02" or "Interface\\Icons\\INV_BannerPVP_01")
     b.emblem:SetAlpha(0.4)
     local size = w >= 60 and 16 or 14
     b.rank = b:CreateFontString(nil, "OVERLAY")

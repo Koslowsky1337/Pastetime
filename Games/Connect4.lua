@@ -130,7 +130,11 @@ function Game:Start(mode)
     for c = 1, COLS do self.b[c] = {}; for r = 1, ROWS do self.b[c][r] = 0 end end
     self.sel, self.state, self.moves, self.score = 4, "player", 0, 0
     self.last, self.winLine = nil, nil
-    self.status:SetText(L["You play the Horde – drop your piece!"])
+    -- du spielst deine Fraktion, der Computer die andere
+    self.ally = ns.IsAlliance()
+    self.myIcon, self.foeIcon = self.ally and ICON_ALLY or ICON_HORDE, self.ally and ICON_HORDE or ICON_ALLY
+    ns.SetIcon(self.indicator, self.myIcon)
+    self.status:SetText(self.ally and L["You play the Alliance – drop your piece!"] or L["You play the Horde – drop your piece!"])
     self:Render()
 end
 
@@ -143,7 +147,7 @@ function Game:Play(c)
     if AI.Wins(self.b, c, r, 1) then return self:Finish(1, c, r) end
     if self:Full() then return self:Finish(0) end
     self.state, self.t = "ai", 0.35
-    self.status:SetText(L["The Alliance is thinking …"])
+    self.status:SetText(self.ally and L["The Horde is thinking …"] or L["The Alliance is thinking …"])
     self:Render()
 end
 
@@ -166,12 +170,13 @@ function Game:Finish(who)
     self:Render()
     if who == 1 then
         self.score = self.mode.base + math.max(0, 21 - self.moves) * 10
-        self.status:SetText(L["|cff80ff80For the Horde!|r"])
+        self.status:SetText(self.ally and L["|cff80ff80For the Alliance!|r"] or L["|cff80ff80For the Horde!|r"])
         self.host:Over({ score = self.score, won = true, text = (L["Four in a row after %d moves – %s defeated."])
             :format(self.moves, self.mode.name) })
     elseif who == 2 then
-        self.status:SetText(L["|cffff6060The Alliance wins.|r"])
-        self.host:Over({ submit = false, title = L["Defeat"], text = L["The Alliance has four in a row."] })
+        self.status:SetText(self.ally and L["|cffff6060The Horde wins.|r"] or L["|cffff6060The Alliance wins.|r"])
+        self.host:Over({ submit = false, title = L["Defeat"],
+            text = self.ally and L["The Horde has four in a row."] or L["The Alliance has four in a row."] })
     else
         self.status:SetText(L["Draw."])
         self.host:Over({ submit = false, title = L["Draw"], text = L["The board is full – nobody won."] })
@@ -223,7 +228,7 @@ function Game:Render()
             local cell = self.cells[c][r]
             local v = self.b[c][r]
             cell.disc:SetShown(v ~= 0)
-            if v ~= 0 then ns.SetIcon(cell.disc, v == 1 and ICON_HORDE or ICON_ALLY) end
+            if v ~= 0 then ns.SetIcon(cell.disc, v == 1 and self.myIcon or self.foeIcon) end
             cell.glow:SetShown(onLine[c * 10 + r] or (self.last and self.last[1] == c and self.last[2] == r) or false)
         end
     end
@@ -292,7 +297,7 @@ ns.RegisterGame({
     keyboard = true,
     width = W, height = H,
     modes = { { id = "leicht", name = L["Easy"] }, { id = "mittel", name = L["Medium"] }, { id = "schwer", name = L["Hard"] } },
-    desc = L["Take turns with the Alliance dropping banners into the board. The first to get four in a row – horizontally, vertically or diagonally – wins. Quick wins against stronger opponents score more points."],
+    desc = L["Take turns with the opposing faction dropping banners into the board. The first to get four in a row – horizontally, vertically or diagonally – wins. Quick wins against stronger opponents score more points."],
     controls = L["Click a column · or choose with A/D or arrows, Space drops · keys 1–7 drop directly"],
     controlsShort = L["Click a column\nA/D + Space · 1–7"],
     Create = Create,

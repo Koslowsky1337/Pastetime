@@ -254,7 +254,7 @@ local function Create(host, board)
             g.cells[y][x] = { icon = icon, sel = sel, cur = cur, flash = flash }
         end
     end
-    g.msg = ns.FontString(board, "GameFontNormalLarge", "CENTER")
+    g.msg = ns.BoardText(board, "GameFontNormalLarge", "CENTER")
     g.msg:SetPoint("CENTER")
     return g
 end

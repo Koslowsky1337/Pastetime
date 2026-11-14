@@ -7,7 +7,7 @@ Diese Liste muss abgehakt sein, bevor `v1.0.0` getaggt wird.
 
 - [x] Paket 1: Tastatur bleibt im Kampf frei, auch auf dem Spielende-Bildschirm
 - [x] Paket 2: Release-Unterlagen (README, Changelog, `.pkgmeta`, Credits, Feedback-Link)
-- [ ] Paket 3: Versionsnummer kommt aus dem Tag
+- [x] Paket 3: Versionsnummer kommt aus dem Tag (`@project-version@` in der TOC; ungepackt zeigt das Addon „dev“)
 - [ ] Paket 4: Zeppelin und Schiff (Anleger, Reload unterwegs, heruntergefallen, Ruhestein)
 - [ ] Paket 5: Sprache und Formate (Zahlen, Datum, Ortsnamen wie im Client)
 - [ ] Paket 6: Spiel-Kleinigkeiten
@@ -81,7 +81,7 @@ Zum Schluss: `/pastime debug` aus, `/reload`, dann Screenshots und Protokoll aus
 ## 5. Release
 - [x] README (= CurseForge-Beschreibung) an die Änderungen anpassen (auch: Horde/Allianz-Varianten), Link zu den GitHub-Issues ergänzen – danach den Text auf der CurseForge-Seite ersetzen
 - [ ] CHANGELOG: zum Release oben den Abschnitt `1.0.0` anlegen (jetzt steht dort `1.0.0-beta2`, ganz unten die Funktionsübersicht)
-- [ ] Version in `Pastime.toc` und `Core.lua` prüfen
+- [x] Version in `Pastime.toc` und `Core.lua` prüfen (kommt jetzt aus dem Tag; im Beta-Zip nachsehen, ob in der TOC die Tag-Version steht)
 - [x] Dateiliste der `.toc` prüfen (29 Einträge, alle vorhanden, keine doppelt)
 - [x] Secret-Scan über die ganze Historie (14.11.: keine Treffer; jeder neue Commit wird einzeln geprüft)
 - [ ] Tag `v1.0.0`, GitHub-Release mit Zip

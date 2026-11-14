@@ -5,7 +5,7 @@
 ## Category: Minigames
 ## Category-deDE: Minispiele
 ## Author: Koslowsky1337
-## Version: 1.0.0
+## Version: @project-version@
 ## X-License: MIT
 ## IconTexture: Interface\Icons\INV_Misc_Dice_01
 ## AddonCompartmentFunc: Pastime_OnAddonCompartmentClick

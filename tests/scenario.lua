@@ -32,6 +32,8 @@ fire("PLAYER_LOGIN")
 check(PastimeDB and PastimeDB.settings.autoOpen == true, "DB-Standardwerte")
 check(#ns.games == 19, "19 Spiele registriert, sind " .. #ns.games)
 check(ns.minimapButton ~= nil, "Minimap-Knopf")
+check(ns.VersionFrom("v1.0.0-beta2") == "v1.0.0-beta2" and ns.VersionFrom("@project-version@") == "dev"
+    and ns.VersionFrom(nil) == "dev" and ns.VERSION == "dev", "Version kommt aus der TOC, ungepackt „dev“")
 
 -- Fenster + Auswahl ------------------------------------------------------------
 slash("")

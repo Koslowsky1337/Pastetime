@@ -6,6 +6,7 @@ Please report anything odd: https://github.com/Koslowsky1337/Pastime/issues
 
 - Horde and Alliance: the window wears your faction's colours. Alliance characters get Gryphon Flight, Ram Dash and Bell Echo instead of Wind Rider, Kodo Dash and Totem Echo, Elwynn fish in Fishing and a meadow for the Wind Serpent.
 - Fixed: on the game-over screen, the keyboard stayed locked when a fight started and "Hide in combat" was switched off.
+- The version in the addon list and in `/pastime diag` now names the exact build.
 
 ## 1.0.0-beta1 – first beta
 

@@ -3,7 +3,12 @@ local ADDON, ns = ...
 local L = ns.L
 _G.Pastime = ns
 
-ns.VERSION = "1.0.0"
+-- Version aus der TOC: der Packager setzt dort den Tag ein (z. B. v1.0.0-beta2);
+-- in der ungepackten Kopie steht noch der Platzhalter
+function ns.VersionFrom(v)
+    return (type(v) == "string" and v ~= "" and not v:find("@", 1, true)) and v or "dev"
+end
+ns.VERSION = ns.VersionFrom(C_AddOns and C_AddOns.GetAddOnMetadata and C_AddOns.GetAddOnMetadata(ADDON, "Version"))
 
 ---------------------------------------------------------------------------
 -- Protokoll (PastimeDB.log)

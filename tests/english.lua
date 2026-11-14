@@ -23,6 +23,10 @@ fire("ADDON_LOADED", "Pastime")
 fire("PLAYER_LOGIN")
 check(ns.LOCALE == "enUS", "locale enUS")
 check(#ns.games == 19, "19 games")
+check(ns.FormatNumber(1054000) == "1,054,000" and ns.FormatNumber(1000) == "1,000" and ns.FormatNumber(12) == "12",
+    "thousands separator is a comma: " .. ns.FormatNumber(1054000))
+ns.SubmitScore(ns.gamesById.kobold, nil, 5)
+check(PastimeDB.scores.kobold[1].d:match("^%d%d%d%d%-%d%d%-%d%d$"), "ISO date in the leaderboard: " .. tostring(PastimeDB.scores.kobold[1].d))
 
 -- Spielnamen ohne Markennamen
 local names = {}

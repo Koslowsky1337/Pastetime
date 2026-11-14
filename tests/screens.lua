@@ -25,7 +25,7 @@ end
 for _, def in ipairs(ns.games) do
     for _, m in ipairs(def.modes or { { id = nil } }) do
         local list = ns.GetScores(def, m.id)
-        for i = 1, 5 do table.insert(list, { s = def.lowerIsBetter and (61 + i) or (1054000 - i), p = "Guenther", d = "13.11.26" }) end
+        for i = 1, 5 do table.insert(list, { s = def.lowerIsBetter and (61 + i) or (1054000 - i), p = "Thokk", d = date(ns.DATE_FORMAT) }) end
     end
 end
 

@@ -9,7 +9,7 @@ Diese Liste muss abgehakt sein, bevor `v1.0.0` getaggt wird.
 - [x] Paket 2: Release-Unterlagen (README, Changelog, `.pkgmeta`, Credits, Feedback-Link)
 - [x] Paket 3: Versionsnummer kommt aus dem Tag (`@project-version@` in der TOC; ungepackt zeigt das Addon „dev“)
 - [x] Paket 4: Zeppelin und Schiff (Anleger, Reload unterwegs, heruntergefallen, Ruhestein, Tod), Strecke löschen
-- [ ] Paket 5: Sprache und Formate (Zahlen, Datum, Ortsnamen wie im Client)
+- [x] Paket 5: Sprache und Formate (Zahlen, Datum, Ortsnamen wie im Client)
 - [ ] Paket 6: Spiel-Kleinigkeiten
 - [ ] Paket 7: Lesbarkeit und Farbschwäche
 - [ ] Paket 8: Tests härten
@@ -22,6 +22,7 @@ Diese Liste muss abgehakt sein, bevor `v1.0.0` getaggt wird.
 - [ ] **`/reload` auf dem Zeppelin:** bei der Ankunft geht kein Fenster auf und es steht keine Reise im Status.
 - [ ] **Am Anleger stehen bleiben:** Fenster schließen, 11 Minuten warten – es öffnet sich nicht erneut.
 - [ ] **Reiserekorde:** „Strecke löschen“ fragt nach und löscht erst beim zweiten Klick 📸.
+- [ ] **Ortsnamen:** Zeppelin- und Schiffsstrecken heißen jetzt „Undercity“, „Ratchet“, „Booty Bay“ wie im Client. Mit einem Allianz-Charakter prüfen: Heißt es dort „Stormwind“, „Southshore“ und „Hafen von Menethil“? Alte Strecken mit „Unterstadt“ oder „Ratschet“ bleiben in der Liste stehen (über „Strecke löschen“ entfernen).
 
 ## 1. Prüfung im Spiel (16 Spiele)
 

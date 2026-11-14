@@ -7,6 +7,7 @@
 --             Messpunkte seit dem letzten Ereignis (siehe Transport.lua)
 --   routes, scores, stats, settings
 local ADDON, ns = ...
+local L = ns.L
 
 local function yesno(v)
     if v == nil then return "?" end
@@ -110,7 +111,7 @@ local function CreatePanel()
     local close = ns.CreateCloseButton(f, function()
         ns.DB.debug = false
         ns.Log("I", "debug", "Debug off (window closed)")
-        ns.Print("Debug |cffff6060off|r.")
+        ns.Print(L["Debug |cffff6060off|r."])
         ns.UpdateDebugPanel()
     end)
     close:SetSize(24, 24)

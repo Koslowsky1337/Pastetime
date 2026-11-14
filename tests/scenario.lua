@@ -34,6 +34,8 @@ check(#ns.games == 19, "19 Spiele registriert, sind " .. #ns.games)
 check(ns.minimapButton ~= nil, "Minimap-Knopf")
 check(ns.VersionFrom("v1.0.0-beta2") == "v1.0.0-beta2" and ns.VersionFrom("@project-version@") == "dev"
     and ns.VersionFrom(nil) == "dev" and ns.VERSION == "dev", "Version kommt aus der TOC, ungepackt „dev“")
+check(ns.FormatNumber(1054000) == "1.054.000" and ns.FormatNumber(999) == "999" and ns.FormatNumber(-1234) == "-1.234",
+    "Zahlen mit Tausenderpunkt: " .. ns.FormatNumber(1054000))
 
 -- Fenster + Auswahl ------------------------------------------------------------
 slash("")
@@ -125,6 +127,7 @@ tick(3)
 check(g.dead and run.state == "over", "Snake an Wand gestorben")
 check(ns.overlay.title.text == "Spiel vorbei" and ns.overlay.text.text:find("Neuer Rekord"), "Rekord-Overlay: " .. ns.overlay.text.text)
 check(PastimeDB.scores.snake and PastimeDB.scores.snake[1].s == g.score, "Snake-Rekord gespeichert")
+check(PastimeDB.scores.snake[1].d:match("^%d%d%.%d%d%.%d%d$"), "Datum deutsch (TT.MM.JJ): " .. tostring(PastimeDB.scores.snake[1].d))
 -- Leertaste = nochmal (nach der kurzen Sperre)
 NOW = NOW + 2
 check(key("SPACE"), "SPACE im Endbildschirm verbraucht")
@@ -368,7 +371,7 @@ slash("testflug löschen")
 check(PastimeDB.routes["test:Testgelände > Orgrimmar"] == nil, "Teststrecken gelöscht")
 ns.ShowLauncher()
 
--- Zeppelin Orgrimmar -> Unterstadt ---------------------------------------------------
+-- Zeppelin Orgrimmar -> Undercity ---------------------------------------------------
 local function ttick(n) for _ = 1, n or 1 do NOW = NOW + 0.5; ns.TransportTick() end end
 ns.frame:Hide()
 PLAYER.map, PLAYER.x, PLAYER.y = 1411, 0.5082, 0.1354
@@ -376,9 +379,9 @@ SPEED, MOVING = 0, false
 ttick(4)
 check(not trip.active, "nach 2 s noch kein Warten")
 ttick(8)
-check(trip.active and trip.kind == "zeppelin" and trip.phase == "wait" and trip.from == "Orgrimmar" and trip.to == "Unterstadt", "wartet auf Zeppelin nach Unterstadt: " .. tostring(trip.to))
+check(trip.active and trip.kind == "zeppelin" and trip.phase == "wait" and trip.from == "Orgrimmar" and trip.to == "Undercity", "wartet auf Zeppelin nach Undercity: " .. tostring(trip.to))
 check(ns.frame:IsShown() and ns.launcher:IsVisible(), "Fenster öffnet sich am Zeppelinturm")
-check(ns.launcher.status.text:find("Du wartest auf den Zeppelin nach Unterstadt"), "Status: " .. ns.launcher.status.text)
+check(ns.launcher.status.text:find("Du wartest auf den Zeppelin nach Undercity"), "Status: " .. ns.launcher.status.text)
 ns.StartGame(ns.gamesById["2048"])
 g = ns.run.game
 g.cells = { { 2, 2, 0, 0 }, { 4, 4, 0, 0 }, { 0, 0, 0, 0 }, { 0, 0, 0, 0 } }
@@ -387,19 +390,19 @@ check(g.score == 12, "2048: 12 Punkte")
 -- Zeppelin legt ab: wir werden bewegt, ohne zu laufen
 for i = 1, 6 do PLAYER.x = PLAYER.x + 0.0015; ttick(1) end
 check(trip.phase == "ride" and trip.start ~= nil, "Abfahrt erkannt")
-check(ns.TripStatus():find("Zeppelin nach Unterstadt"), "Status Fahrt: " .. ns.TripStatus())
+check(ns.TripStatus():find("Zeppelin nach Undercity"), "Status Fahrt: " .. ns.TripStatus())
 for i = 1, 20 do PLAYER.x = PLAYER.x + 0.0015; ttick(1) end
 -- Ladebildschirm: anderer Kontinent, kurz vor dem Turm in Tirisfal
 PLAYER.map, PLAYER.x, PLAYER.y = 1420, 0.5900, 0.5887
 ttick(1)
 for i = 1, 4 do PLAYER.x = PLAYER.x + 0.0035; ttick(1) end
 check(trip.active, "noch unterwegs, solange er fährt")
-ttick(8)   -- legt in Unterstadt an
+ttick(8)   -- legt in Undercity an
 check(not trip.active, "Ankunft erkannt")
-local zkey = "zeppelin:Orgrimmar > Unterstadt"
+local zkey = "zeppelin:Orgrimmar > Undercity"
 local zr = PastimeDB.routes[zkey]
 check(zr and zr.n == 1 and zr.t and zr.t > 5, "Zeppelinstrecke gemerkt: " .. tostring(zr and zr.t))
-check(ns.overlay.kind == "landed" and ns.overlay.title.text == "Angekommen in Unterstadt!", "Ankunftsdialog: " .. ns.overlay.title.text)
+check(ns.overlay.kind == "landed" and ns.overlay.title.text == "Angekommen in Undercity!", "Ankunftsdialog: " .. ns.overlay.title.text)
 check(zr.scores["2048"] and zr.scores["2048"][1].s == 12, "2048-Stand für Zeppelinstrecke")
 check(ns.alertFrame.title.text == "Angekommen!", "Ankunftsalarm")
 ns.overlay.btn2:Click()
@@ -414,19 +417,19 @@ MOVING = false
 PLAYER.x, PLAYER.y = 0.6074, 0.5887
 ns.frame:Hide()
 ttick(12)
-check(trip.active and trip.phase == "wait" and trip.from == "Unterstadt" and trip.to == "Orgrimmar", "wartet in Unterstadt auf Orgrimmar: " .. tostring(trip.to))
+check(trip.active and trip.phase == "wait" and trip.from == "Undercity" and trip.to == "Orgrimmar", "wartet in Undercity auf Orgrimmar: " .. tostring(trip.to))
 for i = 1, 4 do PLAYER.x = PLAYER.x - 0.002; ttick(1) end
-check(trip.phase == "ride", "Abfahrt Unterstadt")
+check(trip.phase == "ride", "Abfahrt Undercity")
 ns.StartGame(ns.gamesById.flappy)
 g = ns.run.game
 key("SPACE")
 g.score = 3
 for i = 1, 200 do tick(0.02, 0.02); if g.dead then break end end
 check(ns.run.state == "over" and ns.overlay.text.text:find("sobald du ankommst"), "Ergebnis vorgemerkt: " .. ns.overlay.text.text)
-check(PastimeDB.routes["zeppelin:Unterstadt > Orgrimmar"] == nil, "Strecke noch nicht angelegt")
+check(PastimeDB.routes["zeppelin:Undercity > Orgrimmar"] == nil, "Strecke noch nicht angelegt")
 PLAYER.map, PLAYER.x, PLAYER.y = 1411, 0.5082, 0.1354
 ttick(1); ttick(8)
-local back = PastimeDB.routes["zeppelin:Unterstadt > Orgrimmar"]
+local back = PastimeDB.routes["zeppelin:Undercity > Orgrimmar"]
 check(back and back.scores.flappy and back.scores.flappy[1].s == 3, "vorgemerktes Ergebnis bei Ankunft eingetragen")
 -- Warten und wieder gehen: verworfen, Fenster schließt sich
 MOVING = true
@@ -515,7 +518,7 @@ for _, tr in ipairs(traces) do table.insert(ev, tr.e) end
 check(#traces >= 4, "Reise-Mitschnitte gespeichert: " .. table.concat(ev, ","))
 local zepTrace
 for _, tr in ipairs(traces) do if tr.e == "ankunft" and tr.info:find("zeppelin") then zepTrace = tr end end
-check(zepTrace and #zepTrace.s > 5 and zepTrace.s[#zepTrace.s]:find("Unterstadt") or zepTrace.s[#zepTrace.s]:find("Orgrimmar"),
+check(zepTrace and #zepTrace.s > 5 and zepTrace.s[#zepTrace.s]:find("Undercity") or zepTrace.s[#zepTrace.s]:find("Orgrimmar"),
     "Zeppelin-Ankunft mit Messpunkten: " .. (zepTrace and (#zepTrace.s .. " · " .. tostring(zepTrace.s[#zepTrace.s])) or "-"))
 check(PastimeDB.traces[#PastimeDB.traces].s ~= nil, "Mitschnitt hat Punkte-Liste")
 slash("debug")
@@ -524,7 +527,7 @@ ns.debugPanel.scripts.OnUpdate(ns.debugPanel, 1)
 local dtext = ns.debugPanel.text.text
 check(dtext:find("Dock") and dtext:find("Trip") and dtext:find("Taxi"), "Debug-Fenster zeigt Messwerte:\n" .. dtext)
 local diag = ns.DiagReport()
-check(diag:find("== Now ==") and diag:find("Trip traces") and diag:find("zeppelin:Orgrimmar > Unterstadt"), "Diagnosebericht")
+check(diag:find("== Now ==") and diag:find("Trip traces") and diag:find("zeppelin:Orgrimmar > Undercity"), "Diagnosebericht")
 check(not diag:find("|c"), "Diagnose ohne Farbcodes")
 slash("diag")
 check(ns.copyFrame.shown and ns.copyFrame.title.text == "Pastime-Diagnose", "/pastime diag öffnet Kopierfenster")

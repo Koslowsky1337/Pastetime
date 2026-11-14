@@ -95,4 +95,10 @@ check(g.set.cards[1].emblem.tex:find("Alliance"), "Runenpaare: Allianz-Wappen")
 g = start("blackjack")
 check(g.dealerCards[1].emblem.tex:find("PVP_02"), "Kartenrücken: Allianz-Banner")
 
+-- Testflug: Ziel der eigenen Fraktion
+SlashCmdList.PASTIME("testflug 20")
+check(ns.trip.active and ns.trip.to == L["Stormwind"], "Testflug der Allianz geht nach Stormwind: " .. tostring(ns.trip.to))
+SlashCmdList.PASTIME("testflug")
+SlashCmdList.PASTIME("testflug löschen")
+
 print(("Allianz-Tests: %d ok, %d Fehler"):format(passes, fails))

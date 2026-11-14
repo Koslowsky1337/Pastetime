@@ -129,7 +129,9 @@ end
 function ns.FormatNumber(n)
     n = math.floor((n or 0) + 0.5)
     local s = tostring(math.abs(n))
-    local out = s:reverse():gsub("(%d%d%d)", "%1."):reverse():gsub("^%.", "")
+    local sep = ns.THOUSANDS
+    local out = s:reverse():gsub("(%d%d%d)", "%1" .. sep):reverse()
+    if out:sub(1, 1) == sep then out = out:sub(2) end
     return (n < 0 and "-" or "") .. out
 end
 
@@ -311,7 +313,7 @@ local function insertScore(def, list, score, max)
         if better(def, score, e.s) then rank = i; break end
     end
     if rank > max then return nil, false end
-    table.insert(list, rank, { s = score, p = ns.playerName or "?", d = date("%d.%m.%y") })
+    table.insert(list, rank, { s = score, p = ns.playerName or "?", d = date(ns.DATE_FORMAT) })
     while #list > max do table.remove(list) end
     return rank, personal
 end
@@ -484,7 +486,7 @@ function ns.EndTrip(arrived, dest)
         local dur = GetTime() - (t.start or GetTime())
         if dur > 10 then r.t = math.floor(dur + 0.5) end
         r.n = (r.n or 0) + 1
-        r.last, r.lastT = date("%d.%m.%y"), time()
+        r.last, r.lastT = date(ns.DATE_FORMAT), time()
         if not t.confirmed then
             t.confirmed = true
             for _, p in ipairs(t.pending) do ns.SubmitRouteScore(r, p.def, p.mode, p.score) end
@@ -759,7 +761,7 @@ function ns.HandleSlash(msg)
         end
         local sec = math.max(5, math.min(600, tonumber(rest) or 30))
         ns.Print(L["Test flight: %d seconds. |cffffffff/pastime testflight|r again lands immediately."]:format(sec))
-        ns.BeginTrip({ kind = "test", from = L["Test Range"], to = L["Orgrimmar"], sim = sec })
+        ns.BeginTrip({ kind = "test", from = L["Test Range"], to = ns.IsAlliance() and L["Stormwind"] or L["Orgrimmar"], sim = sec })
     elseif cmd == "dock" then
         if ns.PrintNearestDock then ns.PrintNearestDock() end
     elseif cmd == "minimap" then

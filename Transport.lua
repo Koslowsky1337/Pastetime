@@ -224,18 +224,25 @@ local function Tick()
             moving == nil and "?" or (moving and "j" or "n"), dock and (dock.name .. ">" .. dock.to) or "-", dd or -1,
             carried and "C" or "-"))
     end
-    -- Nach einer Ankunft nicht gleich wieder „warten“, erst den Anleger verlassen
-    if S.suppress and (S.suppress.c ~= c or dist(x, y, S.suppress.x, S.suppress.y) > WAIT_R + 25) then
-        S.suppress = nil
-    end
+    -- Entfernt man sich vom nächsten Anleger (Abfahrt), oder kommt man näher (Ankunft)?
+    if dock and S.nearDock == dock and dd > S.nearDD + 0.5 then S.leaving = (S.leaving or 0) + 1 else S.leaving = 0 end
+    S.nearDock, S.nearDD = dock, dd
+    -- Nach einer Ankunft (suppress) oder abgelaufener Wartezeit (idleDock) nicht gleich wieder
+    -- „warten“, erst den Anleger verlassen. Verglichen wird der Name: ein Turm hat zwei Seiten.
+    local function left(d) return d.c ~= c or dist(x, y, d.x, d.y) > WAIT_R + 25 end
+    if S.suppress and left(S.suppress) then S.suppress = nil end
+    if S.idleDock and left(S.idleDock) then S.idleDock = nil end
+    local arrivedHere = dock and S.suppress and S.suppress.name == dock.name
+    local idleHere = dock and S.idleDock and S.idleDock.name == dock.name
 
     if not t.active then
-        if dock and dd <= BOARD_R and carriedCount(4) >= 3 and dock ~= S.suppress then
-            -- direkt eingestiegen und schon unterwegs
+        if dock and dd <= BOARD_R and carriedCount(4) >= 3 and S.leaving >= 2 and not arrivedHere then
+            -- direkt eingestiegen und schon unterwegs. Nur wenn man sich entfernt: wer nach einem
+            -- /reload mitten in der Fahrt am Ziel anlegt, kommt näher und startet keine Reise.
             ns.BeginTrip({ kind = dock.kind, phase = "wait", from = dock.name, to = dock.to, dock = dock })
             ns.DepartTrip()
             S.still = 0
-        elseif dock and dd <= WAIT_R and dock ~= S.suppress and not walking and v < 1 then
+        elseif dock and dd <= WAIT_R and not arrivedHere and not idleHere and not walking and v < 1 then
             if S.waitDock ~= dock then S.waitDock, S.waitSince = dock, now end
             if now - S.waitSince >= WAIT_OPEN then
                 S.waitDock = nil
@@ -267,6 +274,7 @@ local function Tick()
                 v, tostring(speed), tostring(moving), c == origin.c and dist(x, y, origin.x, origin.y) or -1)
             ns.EndTrip(false)
         elseif now - (t.waitStart or now) > MAX_WAIT then
+            S.idleDock = origin      -- wer am Anleger bleibt (AFK, Angeln), bekommt das Fenster nicht alle zehn Minuten neu
             ns.EndTrip(false)
         end
         return
@@ -278,8 +286,36 @@ local function Tick()
             dock and dock.name or "-", dd or -1)
     end
     local origin = t.dock
+    local atOther = dock and dd <= ARRIVE_R and dock.name ~= (origin and origin.name)
+    -- Nach der Abfahrt heruntergefallen und zurück am Startanleger: wieder warten,
+    -- sonst zählte die Fahrzeit ab der ersten Abfahrt.
+    if origin and dock and dock.name == origin.name and dd <= WAIT_R and not carried then
+        S.back = (S.back or 0) + STEP
+        if S.back >= 3 then
+            S.back = 0
+            t.phase, t.start, t.expected, t.waitStart = "wait", nil, nil, now
+            ns.Log("I", "hafen", "Back at the dock after departure – waiting again")
+            if ns.UpdateUI then ns.UpdateUI() end
+            return
+        end
+    else
+        S.back = 0
+    end
+    -- Fernab aller Anleger still stehen kann nur, wer nicht mehr an Bord ist
+    -- (Ruhestein, Teleport, über Bord gegangen): Reise verwerfen statt später falsch werten.
+    if v < 1 and not moving and not atOther then
+        S.idle = (S.idle or 0) + STEP
+        if S.idle >= 8 then
+            S.idle = 0
+            ns.Log("I", "hafen", "No longer on board (standing still away from the docks) – trip discarded")
+            ns.EndTrip(false)
+            return
+        end
+    else
+        S.idle = 0
+    end
     local away = (not origin) or c ~= origin.c or dist(x, y, origin.x, origin.y) > AWAY
-    if away and dock and dd <= ARRIVE_R and dock.name ~= (origin and origin.name) then
+    if away and atOther then
         if carried then S.still = 0 else S.still = (S.still or 0) + STEP end
         if S.still >= 3 or walking then
             S.still = 0

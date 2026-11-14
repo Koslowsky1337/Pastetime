@@ -5,7 +5,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 ADDON = os.path.dirname(HERE)
 RUNS = [
     ("scenario", "deDE", "Horde"), ("english", "enUS", "Horde"),
-] + [(s, loc, "Horde") for s in ("games", "migrate", "comm", "layout") for loc in ("deDE", "enUS")] \
+] + [(s, loc, "Horde") for s in ("games", "migrate", "comm", "layout", "transport") for loc in ("deDE", "enUS")] \
   + [("alliance", loc, "Alliance") for loc in ("deDE", "enUS")] \
   + [("screens", loc, fac) for loc in ("deDE", "enUS") for fac in ("Horde", "Alliance")]
 

@@ -8,7 +8,7 @@ Diese Liste muss abgehakt sein, bevor `v1.0.0` getaggt wird.
 - [x] Paket 1: Tastatur bleibt im Kampf frei, auch auf dem Spielende-Bildschirm
 - [x] Paket 2: Release-Unterlagen (README, Changelog, `.pkgmeta`, Credits, Feedback-Link)
 - [x] Paket 3: Versionsnummer kommt aus dem Tag (`@project-version@` in der TOC; ungepackt zeigt das Addon „dev“)
-- [ ] Paket 4: Zeppelin und Schiff (Anleger, Reload unterwegs, heruntergefallen, Ruhestein)
+- [x] Paket 4: Zeppelin und Schiff (Anleger, Reload unterwegs, heruntergefallen, Ruhestein, Tod), Strecke löschen
 - [ ] Paket 5: Sprache und Formate (Zahlen, Datum, Ortsnamen wie im Client)
 - [ ] Paket 6: Spiel-Kleinigkeiten
 - [ ] Paket 7: Lesbarkeit und Farbschwäche
@@ -17,6 +17,11 @@ Diese Liste muss abgehakt sein, bevor `v1.0.0` getaggt wird.
 
 ### Dazu im Spiel prüfen
 - [ ] **Kampf auf dem Endbildschirm:** „Im Kampf ausblenden“ aus, eine Partie verlieren, angreifen lassen – Bewegen und Zaubern gehen sofort.
+- [ ] **Zeppelin, ganz normal:** warten, abfahren, ankommen – Strecke und Dauer stimmen (die Erkennung wurde umgebaut). Danach `/pastime diag` 📸.
+- [ ] **Zeppelin ohne Warten:** erst im letzten Moment aufspringen – die Reise wird trotzdem erkannt.
+- [ ] **`/reload` auf dem Zeppelin:** bei der Ankunft geht kein Fenster auf und es steht keine Reise im Status.
+- [ ] **Am Anleger stehen bleiben:** Fenster schließen, 11 Minuten warten – es öffnet sich nicht erneut.
+- [ ] **Reiserekorde:** „Strecke löschen“ fragt nach und löscht erst beim zweiten Klick 📸.
 
 ## 1. Prüfung im Spiel (16 Spiele)
 

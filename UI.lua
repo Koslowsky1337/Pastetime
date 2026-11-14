@@ -959,12 +959,27 @@ local function CreateRecords(parent)
     Ink(d.sub, "soft", dark)
     d.rules = ns.FontString(d, "QuestFontNormalSmall")
     d.rules:SetPoint("BOTTOMLEFT", 18, 14)
-    d.rules:SetPoint("BOTTOMRIGHT", -18, 14)
+    d.rules:SetPoint("BOTTOMRIGHT", -142, 14)
     d.rules:SetText(L["Rounds count if they were started and finished while travelling, or scored on arrival. Abandoned rounds never count."])
     Ink(d.rules, "soft", dark)
+    -- Strecke löschen (z. B. eine falsch erkannte): der zweite Klick bestätigt
+    d.del = ns.CreateButton(d, L["Delete route"], 120, function()
+        local key = ns.selectedRoute
+        if not (key and ns.DB.routes[key]) then return end
+        if d.armed == key then
+            ns.DB.routes[key] = nil
+            d.armed, ns.selectedRoute = nil, nil
+            ns.Log("I", "strecke", "Route deleted: %s", key)
+        else
+            d.armed = key
+        end
+        ns.PlaySound("click")
+        ns.UpdateRecords()
+    end)
+    d.del:SetPoint("BOTTOMRIGHT", -16, 14)
     local sf = CreateFrame("ScrollFrame", nil, d, "UIPanelScrollFrameTemplate")
     sf:SetPoint("TOPLEFT", 18, -72)
-    sf:SetPoint("BOTTOMRIGHT", -34, 46)
+    sf:SetPoint("BOTTOMRIGHT", -34, 62)
     local child = CreateFrame("Frame", nil, sf)
     child:SetSize(300, 10)
     sf:SetScrollChild(child)
@@ -992,6 +1007,9 @@ function ns.UpdateRecords()
     v.list:SetData(items, BindRouteRow)
     local d = v.detail
     local r = ns.selectedRoute and ns.DB.routes[ns.selectedRoute]
+    if d.armed ~= ns.selectedRoute then d.armed = nil end
+    d.del:SetShown(r ~= nil)
+    d.del:SetText(d.armed and L["Really delete?"] or L["Delete route"])
     if not r then
         ns.SetIcon(d.icon.icon, ns.TEX.dice)
         d.title:SetText(L["No journeys yet"])

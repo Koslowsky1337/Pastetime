@@ -631,7 +631,7 @@ ev:SetScript("OnEvent", ns.Wrap("event", function(_, event, ...)
         if ns.UpdateDebugPanel then ns.UpdateDebugPanel() end
         EnsureTicker()
         for _, e in ipairs({ "PLAYER_ENTERING_WORLD", "PLAYER_CONTROL_LOST", "PLAYER_CONTROL_GAINED",
-                              "PLAYER_REGEN_DISABLED", "PLAYER_REGEN_ENABLED" }) do
+                              "PLAYER_REGEN_DISABLED", "PLAYER_REGEN_ENABLED", "PLAYER_DEAD" }) do
             ev:RegisterEvent(e)
         end
 
@@ -648,6 +648,11 @@ ev:SetScript("OnEvent", ns.Wrap("event", function(_, event, ...)
     elseif event == "PLAYER_REGEN_ENABLED" then
         ns.inCombat = false
         if ns.UpdateUI then ns.UpdateUI() end
+
+    elseif event == "PLAYER_DEAD" then
+        -- wer stirbt, fährt nicht weiter: Zeppelin- oder Schiffsreise verwerfen
+        local t = ns.trip
+        if t.active and (t.kind == "zeppelin" or t.kind == "schiff") then ns.EndTrip(false) end
     end
 end))
 

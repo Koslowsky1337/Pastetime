@@ -7,6 +7,8 @@ Please report anything odd: https://github.com/Koslowsky1337/Pastime/issues
 - Horde and Alliance: the window wears your faction's colours. Alliance characters get Gryphon Flight, Ram Dash and Bell Echo instead of Wind Rider, Kodo Dash and Totem Echo, Elwynn fish in Fishing and a meadow for the Wind Serpent.
 - Fixed: on the game-over screen, the keyboard stayed locked when a fight started and "Hide in combat" was switched off.
 - The version in the addon list and in `/pastime diag` now names the exact build.
+- Zeppelins and boats: the window no longer reopens every ten minutes while you stand at a dock; a `/reload` during the ride no longer starts a phantom trip on arrival; falling off after departure, a hearthstone or dying no longer leaves wrong travel times or routes behind.
+- Route records: a route can be deleted (the button asks once more before it does).
 
 ## 1.0.0-beta1 – first beta
 

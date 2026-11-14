@@ -637,9 +637,11 @@ ev:SetScript("OnEvent", ns.Wrap("event", function(_, event, ...)
         later(0.3, "flug-check", ns.CheckTaxi)
 
     elseif event == "PLAYER_REGEN_DISABLED" then
+        ns.inCombat = true      -- InCombatLockdown() meldet den Kampf erst nach diesem Ereignis
         if ns.OnCombat then ns.OnCombat() end
 
     elseif event == "PLAYER_REGEN_ENABLED" then
+        ns.inCombat = false
         if ns.UpdateUI then ns.UpdateUI() end
     end
 end))

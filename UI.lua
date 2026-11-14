@@ -64,7 +64,7 @@ function ns.UpdateKeyboard()
     if not gv then return end
     local run = ns.run
     local want = run ~= nil and gv:IsVisible()
-        and (run.state == "running" or run.state == "over") and not InCombatLockdown()
+        and (run.state == "running" or run.state == "over") and not (ns.inCombat or InCombatLockdown())
     want = want and true or false
     if want ~= kbOn then
         pcall(gv.EnableKeyboard, gv, want)

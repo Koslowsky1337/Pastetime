@@ -3,6 +3,21 @@
 Diese Liste muss abgehakt sein, bevor `v1.0.0` getaggt wird.
 (Sie kommt nicht ins Addon-Zip: `.pkgmeta` lässt alle `*.md` weg.)
 
+## 0. Reparaturen nach der Gesamt-Evaluation (14.11.)
+
+- [x] Paket 1: Tastatur bleibt im Kampf frei, auch auf dem Spielende-Bildschirm
+- [ ] Paket 2: Release-Unterlagen (README, Changelog, `.pkgmeta`, Credits, Feedback-Link)
+- [ ] Paket 3: Versionsnummer kommt aus dem Tag
+- [ ] Paket 4: Zeppelin und Schiff (Anleger, Reload unterwegs, heruntergefallen, Ruhestein)
+- [ ] Paket 5: Sprache und Formate (Zahlen, Datum, Ortsnamen wie im Client)
+- [ ] Paket 6: Spiel-Kleinigkeiten
+- [ ] Paket 7: Lesbarkeit und Farbschwäche
+- [ ] Paket 8: Tests härten
+- [ ] Bot- und Glücksspiele: Gegner macht Fehler, man kann gewinnen
+
+### Dazu im Spiel prüfen
+- [ ] **Kampf auf dem Endbildschirm:** „Im Kampf ausblenden“ aus, eine Partie verlieren, angreifen lassen – Bewegen und Zaubern gehen sofort.
+
 ## 1. Prüfung im Spiel (16 Spiele)
 
 Im Spiel bestätigt sind bisher: Windnatter, Windreiter, Kodo-Sprint.

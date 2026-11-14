@@ -475,6 +475,17 @@ COMBAT = false
 fire("PLAYER_REGEN_ENABLED")
 ns.Resume()
 check(ns.run.state == "running" and ns.gameView.kb, "nach Kampf fortsetzbar")
+-- Kampf auf dem Spielende-Bildschirm, Fenster bleibt offen: die Tastatur muss frei sein.
+-- (InCombatLockdown() ist im Ereignis PLAYER_REGEN_DISABLED noch false.)
+PastimeDB.settings.hideInCombat = false
+ns.StartGame(ns.gamesById.snake)
+key("RIGHT"); tick(3)
+check(ns.run.state == "over" and ns.gameView.kb, "Endbildschirm fängt die Tastatur")
+fire("PLAYER_REGEN_DISABLED")
+check(ns.frame:IsShown() and not ns.gameView.kb, "Kampf auf dem Endbildschirm: Tastatur frei, obwohl das Fenster offen bleibt")
+fire("PLAYER_REGEN_ENABLED")
+check(ns.gameView.kb, "nach dem Kampf fängt der Endbildschirm die Tastatur wieder")
+PastimeDB.settings.hideInCombat = true
 slash("snake")
 check(ns.run.def.id == "snake", "/pastime snake startet direkt")
 slash("rekorde")

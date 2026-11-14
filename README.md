@@ -9,10 +9,11 @@ Pastime is a collection of 19 small games in a classic-style window. It notices 
 - **Opens on its own when you travel:** flight paths, zeppelins and boats. You can switch this off and open the window with `/pastime`, the minimap button or a key binding instead.
 - **Knows your trip:** after the first time on a route, Pastime remembers how long it takes and shows the time left. When little time is left, long games are greyed out in the list.
 - **Landing alarm:** when you land or arrive, the game pauses and you get a soft sound and a large notice. Then choose **Keep playing** or **Finish & score**.
-- **Leaderboards:** a top 10 for every game (and every difficulty) plus a top 5 per game for each route you have travelled. Only finished rounds count; quitting early never counts.
+- **Leaderboards:** a top 10 for every game (and every difficulty) plus a top 5 per game for each route you have travelled. Only finished rounds and rounds scored on arrival count; quitting early never counts.
 - **Short or long:** each game is marked for short flights (1–2 minutes) or long journeys (several minutes).
 - **Plays like a real game:** while you play, the keyboard belongs to the game, so you can't walk off a dock by accident. Chat, screenshots and volume keys still work. Pause frees your keys, and combat pauses the game instantly (the window can also hide itself).
 - **Classic look and quiet sounds:** parchment, dialog frames and tabs in the style of the original interface. Game sounds play softly on the sound-effects channel.
+- **Horde and Alliance:** the window wears your faction's colours, and some games change with it. Alliance characters fly a gryphon in **Gryphon Flight**, ride a ram in **Ram Dash** and ring the bells of **Bell Echo**.
 - **English and German** client support.
 - **Lightweight and private:** no libraries needed, nothing is sent to other players or anywhere else. Your scores are stored in your own SavedVariables.
 
@@ -20,8 +21,8 @@ Pastime is a collection of 19 small games in a classic-style window. It notices 
 
 **Arcade**
 - **Wind Serpent** (short): steer a snake through the Barrens and eat murloc eggs.
-- **Wind Rider** (short): one-button flying through the spires of Thousand Needles.
-- **Kodo Dash** (short): endless runner – jump cacti and rocks, duck under vultures.
+- **Wind Rider** (short): one-button flying through the spires of Thousand Needles. Alliance: **Gryphon Flight** over Dun Morogh.
+- **Kodo Dash** (short): endless runner – jump cacti and rocks, duck under vultures and rock overhangs. Alliance: **Ram Dash**.
 - **Kobold Bash** (short): bonk kobolds out of mine shafts, but leave the dynamite alone.
 - **Fishing** (short): cast ten times and strike the moment the bobber dips.
 - **Rockfall** (long): falling blocks in item-quality colours.
@@ -30,16 +31,16 @@ Pastime is a collection of 19 small games in a classic-style window. It notices 
 
 **Puzzles**
 - **Goblin Minefield** (short): uncover the safe squares; easy 9×9 or medium 16×16.
-- **Totem Echo** (short): repeat the growing sequence of the four elemental totems.
+- **Totem Echo** (short): repeat the growing sequence of the four elemental totems. Alliance: **Bell Echo**.
 - **Rune Pairs** (short): turn over cards and find matching pairs in as few moves as possible.
 - **Gem Code** (short): crack a jeweller's four-gem code in ten tries.
 - **Word Guess** (short): guess the five-letter word in six tries; English or German word list.
-- **Four in a Row** (short): Horde against an Alliance computer opponent on three difficulty levels.
+- **Four in a Row** (short): your faction against the other one, played by the computer on three difficulty levels.
 - **2048** (long): merge tiles from Poor all the way up to Titanic.
 - **Gems** (long): swap gems to make rows of three and set off chain reactions; 30 moves.
 
 **Dice & Cards**
-- **Goblin Blackjack** (short): ten hands against a goblin dealer, starting with 100 goblin gold.
+- **Goblin Blackjack** (short): get close to 21 against a goblin dealer. Your goblin gold carries over between games; when you go broke, your highest gold is scored.
 - **Tavern Dice** (long): roll five dice up to three times and fill all 13 boxes.
 - **Solitaire** (long): classic Klondike patience against the clock.
 
@@ -48,7 +49,7 @@ Pastime is a collection of 19 small games in a classic-style window. It notices 
 - **Flight paths:** all of them. The route is recognised when you pick your destination at the flight master.
 - **Zeppelins (Horde):** Orgrimmar ↔ Undercity, Orgrimmar ↔ Grom'gol, Undercity ↔ Grom'gol, Thunder Bluff ↔ Zephras Isle.
 - **Boats (everyone):** Booty Bay ↔ Ratchet, Tanaris ↔ Riverglades, Rut'theran ↔ Auberdine.
-- **Boats and zeppelins (Alliance):** Stormwind ↔ Auberdine, Auberdine ↔ Menethil Harbor, Menethil Harbor ↔ Southshore, Menethil Harbor ↔ Theramore, Zephras Isle ↔ Dalaran.
+- **Boats and zeppelins (Alliance):** Stormwind ↔ Auberdine, the round trip Auberdine → Menethil Harbor → Southshore → Auberdine, Menethil Harbor ↔ Theramore, Zephras Isle ↔ Dalaran.
 
 Zeppelin and boat trips are detected from your position: stand on the tower or dock for a few seconds and Pastime knows you are waiting. Once the ship carries you away, the trip has started.
 
@@ -71,9 +72,13 @@ Settings are also available under *Options → AddOns → Pastime*, and there is
 - A round you started during a zeppelin or boat trip counts for that route once you arrive.
 - If something does not work as expected, `/pastime diag` opens a report you can copy into a bug report.
 
+## Feedback
+
+Found a bug or have an idea? Please open an issue on GitHub: https://github.com/Koslowsky1337/Pastime/issues – the report from `/pastime diag` helps a lot.
+
 ## Credits and license
 
-Dock positions for zeppelins and boats were cross-checked with the map data of ForeverDungeonJournal and Leatrix Maps. Thank you!
+The dock positions for zeppelins and boats come from the map data of ForeverDungeonJournal (by Exehn) and Leatrix Maps (by Leatrix). Thank you!
 
 Pastime is free software under the MIT license.
 
@@ -93,10 +98,13 @@ Pastime bündelt 19 kleine Spiele in einem Fenster im klassischen Stil. Es merkt
 - Markierung für kurze Flüge (1–2 Minuten) oder lange Reisen.
 - Während des Spiels gehört die Tastatur dem Spiel – Chat, Screenshot und Lautstärke funktionieren weiter. Im Kampf pausiert das Spiel sofort.
 - Klassischer Look, leise Spielgeräusche, deutsche und englische Texte, keine Bibliotheken, keine Datenübertragung.
+- Horde und Allianz: Das Fenster trägt die Farben deiner Fraktion. Für die Allianz gibt es Greifenflug, Widder-Sprint und Glocken-Echo statt Windreiter, Kodo-Sprint und Totem-Echo.
 
 **Die Spiele**
-- *Geschicklichkeit:* Windnatter, Windreiter, Kodo-Sprint, Kobold-Hauen, Angeln, Steinschlag, Mauerbrecher, Murloc-Invasion
-- *Knobeln:* Goblin-Minenfeld, Totem-Echo, Runenpaare, Edelstein-Code, Wortraten (deutsche Wortliste), Vier in einer Reihe, 2048, Edelsteine
+- *Geschicklichkeit:* Windnatter, Windreiter (Allianz: Greifenflug), Kodo-Sprint (Allianz: Widder-Sprint), Kobold-Hauen, Angeln, Steinschlag, Mauerbrecher, Murloc-Invasion
+- *Knobeln:* Goblin-Minenfeld, Totem-Echo (Allianz: Glocken-Echo), Runenpaare, Edelstein-Code, Wortraten (deutsche Wortliste), Vier in einer Reihe, 2048, Edelsteine
 - *Würfel & Karten:* Goblin-Blackjack, Tavernenwürfel, Solitär
 
 **Befehle:** `/pastime` öffnet das Fenster, `/pastime hilfe` zeigt alle Befehle. Die deutschen Befehle (`rekorde`, `strecken`, `testflug`, `hafen` …) funktionieren ebenfalls. Einstellungen findest du unter *Optionen → AddOns → Pastime*.
+
+**Feedback:** Fehler und Ideen bitte als Issue auf GitHub melden: https://github.com/Koslowsky1337/Pastime/issues. Der Bericht aus `/pastime diag` hilft dabei sehr.

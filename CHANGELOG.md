@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.0-beta2
+
+Please report anything odd: https://github.com/Koslowsky1337/Pastime/issues
+
+- Horde and Alliance: the window wears your faction's colours. Alliance characters get Gryphon Flight, Ram Dash and Bell Echo instead of Wind Rider, Kodo Dash and Totem Echo, Elwynn fish in Fishing and a meadow for the Wind Serpent.
+- Fixed: on the game-over screen, the keyboard stayed locked when a fight started and "Hide in combat" was switched off.
+
 ## 1.0.0-beta1 – first beta
 
 All 19 games have been reviewed. Please report anything odd on GitHub.
@@ -27,7 +34,7 @@ First automatic CurseForge build, mainly to test the packaging. The games are st
 - After game over, Space restarts only after 1.5 seconds (the button works at once).
 - Game details and route records: the parchment now fills the whole panel; the route line uses the full width.
 
-## 1.0.0 – first public release
+## Feature overview (first import, before alpha1)
 
 - 19 mini-games in three categories: Arcade, Puzzles, Dice & Cards.
 - Opens by itself on flight paths, zeppelins and boats; landing alarm with *Keep playing* or *Finish & score*.

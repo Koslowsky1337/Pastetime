@@ -1,12 +1,12 @@
 # Pastime – ToDo bis zur Vollversion 1.0.0
 
 Diese Liste muss abgehakt sein, bevor `v1.0.0` getaggt wird.
-(Sie kommt nicht ins Addon-Zip: `.pkgmeta` lässt alle `*.md` weg.)
+(Sie kommt nicht ins Addon-Zip: `.pkgmeta` nennt `TODO.md` und `README.md` ausdrücklich und lässt zusätzlich alle `*.md` weg.)
 
 ## 0. Reparaturen nach der Gesamt-Evaluation (14.11.)
 
 - [x] Paket 1: Tastatur bleibt im Kampf frei, auch auf dem Spielende-Bildschirm
-- [ ] Paket 2: Release-Unterlagen (README, Changelog, `.pkgmeta`, Credits, Feedback-Link)
+- [x] Paket 2: Release-Unterlagen (README, Changelog, `.pkgmeta`, Credits, Feedback-Link)
 - [ ] Paket 3: Versionsnummer kommt aus dem Tag
 - [ ] Paket 4: Zeppelin und Schiff (Anleger, Reload unterwegs, heruntergefallen, Ruhestein)
 - [ ] Paket 5: Sprache und Formate (Zahlen, Datum, Ortsnamen wie im Client)
@@ -66,19 +66,22 @@ Zum Schluss: `/pastime debug` aus, `/reload`, dann Screenshots und Protokoll aus
 
 ## 3. Offene Entscheidungen
 - [ ] Blackjack: Knopf „Kasse machen“ (Lauf freiwillig beenden und Höchststand werten)?
-- [ ] Layout-Prüfer im Release lassen (nur im Debug-Modus) oder entfernen?
+- [ ] Layout-Prüfer im Release lassen (nur im Debug-Modus) oder entfernen? (Evaluation: drin lassen – er läuft nur im Debug-Modus und ist begrenzt.)
+- [ ] Markennamen in Dateinamen und Befehls-Aliasen (`Games\Tetris.lua`, `/pastime tetris`, `kniffel`, `bejeweled` …): lassen oder umbenennen? Angezeigt wird keiner davon.
+- [ ] Logo: `media/logo.png` und `logo.svg` enthalten C2PA-Herkunftsdaten („erstellt mit Claude“). Drin lassen oder entfernen?
 - [x] Fraktions-Thema für Horde und Allianz (Stufe 3 umgesetzt, Prüfung im Spiel steht unter 1.)
 
 ## 4. CurseForge
-- [ ] Beta-Datei geprüft: Spielversion 1.60.1, Changelog sauber formatiert, Zip enthält nur den Ordner `Pastime` ohne `tests` und `media`
+- [ ] Beta-Datei geprüft: Spielversion 1.60.1, Changelog sauber formatiert, Zip enthält nur den Ordner `Pastime` ohne `tests`, `media`, `README.md` und `TODO.md` (ob CurseForge das Muster `*.md` versteht, steht nicht in deren Doku; `CHANGELOG.md` darf im Zip liegen)
+- [ ] GitHub-Repo: Beschreibung und Topics setzen (beides ist leer)
 - [ ] Logo als PNG hochgeladen (nicht webp)
 - [ ] Screenshots für die Galerie
-- [ ] Haltestellen-Koordinaten selbst nachmessen statt der Daten aus ForeverDungeonJournal und Leatrix Maps (im README genannt)
+- [ ] Haltestellen-Koordinaten selbst nachmessen oder die Autoren fragen: 21 von 24 Einträgen stammen aus ForeverDungeonJournal (Exehn), 3 aus Leatrix Maps (im README jetzt so genannt)
 
 ## 5. Release
-- [ ] README (= CurseForge-Beschreibung) an die Änderungen anpassen (auch: Horde/Allianz-Varianten), Link zu den GitHub-Issues ergänzen
-- [ ] CHANGELOG: Abschnitt 1.0.0 aktualisieren
+- [x] README (= CurseForge-Beschreibung) an die Änderungen anpassen (auch: Horde/Allianz-Varianten), Link zu den GitHub-Issues ergänzen – danach den Text auf der CurseForge-Seite ersetzen
+- [ ] CHANGELOG: zum Release oben den Abschnitt `1.0.0` anlegen (jetzt steht dort `1.0.0-beta2`, ganz unten die Funktionsübersicht)
 - [ ] Version in `Pastime.toc` und `Core.lua` prüfen
-- [ ] Dateiliste der `.toc` prüfen
-- [ ] Secret-Scan über die ganze Historie
+- [x] Dateiliste der `.toc` prüfen (29 Einträge, alle vorhanden, keine doppelt)
+- [x] Secret-Scan über die ganze Historie (14.11.: keine Treffer; jeder neue Commit wird einzeln geprüft)
 - [ ] Tag `v1.0.0`, GitHub-Release mit Zip

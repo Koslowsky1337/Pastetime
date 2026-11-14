@@ -4,6 +4,7 @@
 ## Notes-deDE: 19 Minispiele für Flüge, Zeppeline und Schiffe. Öffnet sich auf Reisen von selbst, pausiert bei der Ankunft und führt Bestenlisten für jede Strecke. /pastime
 ## Category: Minigames
 ## Category-deDE: Minispiele
+## Author: Koslowsky1337
 ## Version: 1.0.0
 ## X-License: MIT
 ## IconTexture: Interface\Icons\INV_Misc_Dice_01

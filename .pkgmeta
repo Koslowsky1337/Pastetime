@@ -4,6 +4,8 @@ ignore:
   - tests
   - media
   - "*.md"
+  - README.md
+  - TODO.md
 
 manual-changelog:
   filename: CHANGELOG.md
